@@ -1,0 +1,940 @@
+openapi: 3.0.3
+info:
+  title: Family Benefits Town
+  description: rest-api для приложения "Пособия для семьи с детьми", часть с городом
+  version: 1.0.0
+  contact:
+    email: smegovic@gmail.com
+servers:
+  - url: http://localhost
+tags:
+  - name: system
+    description: Операции, связанные с системой и безопасностью
+  - name: user
+    description: Получение и изменение пользователя
+  - name: admin
+    description: Получение и изменение администратора
+  - name: city
+    description: Получение и изменение города
+
+
+paths:
+  /pre-login:
+    post:
+      tags:
+        - system
+      summary: Отправляет на указанную почту код для входа в систему
+      description:
+        Отправляет на указанную почту код для входа в систему.
+        Для анонимного клиента.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreLoginRequest'
+      responses:
+        '200':
+          description: Вход в систему выполнен
+          content: { }
+        '404':
+          description: Пользователь с указанным email не найден
+          content: { }
+      security: [ ]
+  /login:
+    post:
+      tags:
+        - system
+      summary: Вход в систему
+      description:
+        Вход в систему.
+        Для анонимного клиента.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Вход в систему выполнен
+          headers:
+            Authorization:
+              schema:
+                description: Токен доступа в формате jwt
+                type: string
+                example: jwt=d6tefy0.fh3653.26r3fyg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '404':
+          description: Пользователь с указанными данными не найден
+          content: { }
+      security: [ ]
+  /logout:
+    post:
+      tags:
+        - system
+      summary: Выход из системы
+      description:
+        Выход из системы.
+        О запросившем клиенте.
+        Для администратора. Для пользователя.
+        Необходима аутентификация.
+      responses:
+        '200':
+          description: Выход из системы выполнен
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Пользователь с указанными данными не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /refresh:
+    post:
+      tags:
+        - system
+      summary: Обновление токена доступа
+      description:
+        Обновление токена доступа.
+        О запросившем клиенте.
+        Для администратора. Для пользователя.
+        Необходима аутентификация.
+      responses:
+        '200':
+          description: Токен доступа обновлен
+          content: { }
+        '401':
+          description: Клиент не авторизован
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Пользователь с указанными данными не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+
+
+  /users:
+    post:
+      tags:
+        - user
+      summary: Создает пользователя. Регистрация гостя
+      description:
+        Создает пользователя. Регистрация гостя.
+        Для анонимного клиента.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSave'
+        required: true
+      responses:
+        '201':
+          description: Пользователь создан
+          content: { }
+        '400':
+          description:
+            Варианты -
+            1) администратор или пользователь с данным email уже существует;
+            2) указанный "email" не является email;
+            3) даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy";
+            4) даты рождения пользователя или детей позже текущей даты.
+        '404':
+          description: Город или критерии с указанными ID не найдены
+          content: { }
+      security: [ ]
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Возвращает информацию о пользователе по ID
+      description:
+        Возвращает информацию о пользователе по ID.
+        О запросившем клиенте.
+        Для пользователя.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID пользователя
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '200':
+          description: Данные о пользователе получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Пользователь с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+    put:
+      tags:
+        - user
+      summary: Обновляет пользователя по ID
+      description:
+        Обновляет данные пользователя.
+        О запросившем клиенте.
+        Для пользователя.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID пользователя
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSave'
+        required: true
+      responses:
+        '201':
+          description: Пользователь обновлен
+          content: { }
+        '400':
+          description:
+            Варианты -
+            1) указанный "email" не является email;
+            2) даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy";
+            3) даты рождения пользователя или детей позже текущей даты;
+            4) пользователь с отличным ID и данным email уже существует.
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description:
+            Варианты -
+            1) пользователь с указанным ID не найден;
+            2) город или критерии с указанными ID не найдены.
+          content: { }
+      security:
+        - bearerAuth: [ ]
+    delete:
+      tags:
+        - user
+      summary: Удаляет пользователя по ID
+      description:
+        Удаляет пользователя по ID. Если пользователь имеет роль админа, то удаляются роль пользователя и пользовательские данные.
+        О запросившем клиенте.
+        Для пользователя.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID пользователя
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Пользователь удален
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Пользователь с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /users/init-data:
+    get:
+      tags:
+        - user
+      summary: Возвращает дополнительные данные для пользователя
+      description:
+        Возвращает дополнительные данные для создания или обновления пользователя.
+        Данные содержат в себе множества кратких информаций о городах.
+      responses:
+        '200':
+          description: Дополнительные данные пользователя получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInitData'
+      security: [ ]
+
+
+  /admins:
+    post:
+      tags:
+        - admin
+      summary: Создает администратора
+      description:
+        Создает администратора.
+        Для супер-администратора.
+        Необходима аутентификация.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminSave'
+        required: true
+      responses:
+        '201':
+          description: Администратор создан
+          content: { }
+        '400':
+          description:
+            Варианты -
+            1) администратор или пользователь с данным email уже существует;
+            2) указанный "email" не является email.
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /admins/{id}:
+    get:
+      tags:
+        - admin
+      summary: Возвращает информацию об администраторе по ID
+      description:
+        Возвращает информацию об администраторе по ID.
+        О запросившем клиенте.
+        Для администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID администратора
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '200':
+          description: Данные об администраторе получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInfo'
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Администратор с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+    put:
+      tags:
+        - admin
+      summary: Обновляет администратора по ID
+      description:
+        Обновляет данные администратора по ID.
+        О запросившем клиенте.
+        Для администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID администратора
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminSave'
+        required: true
+      responses:
+        '201':
+          description: Администратор обновлен
+          content: { }
+        '400':
+          description:
+            Варианты -
+            1) администратор или пользователь с отличным ID и данным email уже существует;
+            2) указанный "email" не является email.
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Администратор с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+    delete:
+      tags:
+        - admin
+      summary: Удаляет администратора по ID
+      description:
+        Удаляет администратора по ID.
+        Для супер администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID администратора
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Администратор удален
+          content: { }
+        '400':
+          description: Невозможно удалить администратора с ролью супер администратора
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Администратор с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /admins/from-user/{idUser}:
+    post:
+      tags:
+        - admin
+      summary: Добавляет роль администратора пользователю
+      description:
+        Добавляет роль администратора пользователю.
+        Для супер администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: idUser
+          in: path
+          description: ID пользователя
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Роль администратора добавлена
+          content: { }
+        '400':
+          description: Указанный пользователь не имеет роли пользователя или имеет роль администратора
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Пользователь с данным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /admins/{id}/to-user:
+    post:
+      tags:
+        - admin
+      summary: Добавляет роль пользователя администратору
+      description:
+        Добавляет роль пользователя администратору.
+        Для супер администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID администратора
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Роль пользователя добавлена
+          content: { }
+        '400':
+          description: Указанный администратор не имеет роли администратора или имеет роль пользователя
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Администратор с данным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /admins/{id}/to-super:
+    post:
+      tags:
+        - admin
+      summary: Передает роль супера администратора другому администратору
+      description:
+        Передает роль супер администратора другому администратору.
+        Для супер администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID администратора
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Роль супер администратора передана
+          content: { }
+        '400':
+          description: Администратор имеет роль супер администратора
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Администратор с данным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+
+
+  /cities:
+    get:
+      tags:
+        - city
+      summary:
+        Возвращает множество городов, в которых есть учреждения и пособия.
+        Фильтр по названию или ID пособия.
+      description:
+        Возвращает множество городов, в которых есть учреждения и пособия.
+        Фильтр по названию или ID пособия.
+      parameters:
+        - name: name
+          in: query
+          description: Название города
+          schema:
+            type: string
+            example: name
+          required: false
+        - name: idBenefit
+          in: query
+          description: ID пособия
+          schema:
+            type: string
+            example: td56387fhj
+          required: false
+      responses:
+        '200':
+          description: Множество городов получено
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObjectShortInfo'
+        '404':
+          description: Город с указанным названием или пособие с указанным ID не найдены
+          content: { }
+      security: [ ]
+    post:
+      tags:
+        - city
+      summary: Создает город
+      description:
+        Создает город.
+        Для администратора.
+        Необходима аутентификация.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitySave'
+        required: true
+      responses:
+        '201':
+          description: Город добавлен
+          content: { }
+        '400':
+          description: Город с указанными данными уже существует
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /cities/{id}:
+    get:
+      tags:
+        - city
+      summary: Возвращает информацию о городе по ID
+      description:
+        Возвращает информацию о городе по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID города
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '200':
+          description: Данные о городе получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CityInfo'
+        '404':
+          description: Город с указанным ID не найден
+          content: { }
+      security: [ ]
+    put:
+      tags:
+        - city
+      summary: Обновляет город по ID
+      description:
+        Обновляет город по ID.
+        Для администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID города
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitySave'
+        required: true
+      responses:
+        '201':
+          description: Город обновлен
+          content: { }
+        '400':
+          description: Город с отличным ID и данным названием уже существует
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Город с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+    delete:
+      tags:
+        - city
+      summary: Удаляет город по ID
+      description:
+        Удаляет город по ID.
+        Для администратора.
+        Необходима аутентификация.
+      parameters:
+        - name: id
+          in: path
+          description: ID города
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
+      responses:
+        '201':
+          description: Город удален
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+        '404':
+          description: Город с указанным ID не найден
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /cities/partial:
+    get:
+      tags:
+        - city
+      summary: Возвращает множество городов, в которых нет учреждений или пособий
+      description:
+        Возвращает множество городов, в которых нет учреждений или пособий.
+        Для администратора.
+        Необходима аутентификация.
+      responses:
+        '200':
+          description: Множество городов получено
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObjectShortInfo'
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+      security:
+        - bearerAuth: [ ]
+
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserInfo:
+      description: Информация о пользователе
+      properties:
+        id:
+          description: ID пользователя
+          type: string
+          example: td56387fhj
+        name:
+          description: Имя пользователя
+          type: string
+          example: name
+        email:
+          description: Электронная почта пользователя
+          type: string
+          example: exmaple@mail.com
+        birthDateChildren:
+          description: Множество дат рождений детей пользователя
+          type: array
+          items:
+            type: string
+            format: date
+            example: 01.01.2022
+        dateBirth:
+          description: Дата рождения пользователя
+          type: string
+          format: date
+          example: 01.01.2022
+        nameRoleSet:
+          description: Множество названий ролей пользователя
+          type: array
+          items:
+            description: Название роли
+            type: string
+            example: name
+        nameCity:
+          description: Название города пользователя
+          type: string
+          example: name
+    UserSave:
+      description: Объект запроса для сохранения пользователя, создания или обновления
+      properties:
+        name:
+          description: Имя пользователя
+          type: string
+          example: name
+        email:
+          description: Электронная почта пользователя
+          type: string
+          example: exmaple@mail.com
+        birthDateChildren:
+          description: Множество дат рождений детей пользователя
+          type: array
+          items:
+            description: Дата рождения ребенка
+            type: string
+            format: date
+            example: 01.01.2022
+        dateBirth:
+          description: Дата рождения пользователя
+          type: string
+          format: date
+          example: 01.01.2022
+        idCity:
+          description: ID города пользователя
+          type: string
+          example: td56387fhj
+        idCriterionSet:
+          description: Множество ID критерий пользователя
+          type: array
+          items:
+            description: ID критерия
+            type: string
+            example: td56387fhj
+    UserInitData:
+      description: Дополнительные данные для создания или обновления пользователя.
+        Содержат в себе множества кратких информаций о городах и полных инф. о критериях
+      properties:
+        shortCitySet:
+          description: Множество кратких информаций о городах
+          type: array
+          items:
+            $ref: '#/components/schemas/ObjectShortInfo'
+
+
+    PreLoginRequest:
+      description: Объект запроса пользователя для получения кода для входа в систему
+      properties:
+        email:
+          description: Электронная почта пользователя
+          type: string
+          example: example@mail.com
+    LoginRequest:
+      description: Объект запроса пользователя для входа в систему
+      properties:
+        email:
+          description: Электронная почта пользователя
+          type: string
+          example: example@mail.com
+        loginCode:
+          description: Код пользователя для входа в систему
+          type: integer
+          example: 111222
+    LoginResponse:
+      description: Объект ответа на вход в систему
+      properties:
+        idUser:
+          description: ID пользователя
+          type: string
+          example: td56387fhj
+        nameUser:
+          description: Имя пользователя
+          type: string
+          example: name
+        nameRoleUserSet:
+          description: Множество названий ролей пользователя
+          type: array
+          items:
+            description: Роль пользователя
+            type: string
+            example: role
+
+
+    AdminInfo:
+      description: Информация об администраторе
+      properties:
+        id:
+          description: ID администратора
+          type: string
+          example: td56387fhj
+        name:
+          description: Имя администратора
+          type: string
+          example: name
+        email:
+          description: Электронная почта администратора
+          type: string
+          example: exmaple@mail.com
+        nameRoleSet:
+          description: Множество названий ролей администратора
+          type: array
+          items:
+            description: Название роли
+            type: string
+            example: name
+    AdminSave:
+      description: Объект запроса для сохранения администратора, создания или обновления
+      properties:
+        name:
+          description: Имя администратора
+          type: string
+          example: name
+        email:
+          description: Электронная почта администратора
+          type: string
+          example: exmaple@mail.com
+
+
+    CityInfo:
+      description: Информация о городе
+      properties:
+        id:
+          description: ID города
+          type: string
+          example: td56387fhj
+        name:
+          description: Название города
+          type: string
+          example: name
+        info:
+          description: Информация города
+          type: string
+          example: info
+    CitySave:
+      description: Объект запроса для сохранения города, создания или обновления
+      properties:
+        name:
+          description: Название города
+          type: string
+          example: name
+        info:
+          description: Информация города
+          type: string
+          example: info
+
+
+    ObjectShortInfo:
+      description: Краткая информация об объекте
+      properties:
+        idObject:
+          description: ID объекта
+          type: string
+          example: td56387fhj
+        nameObject:
+          description: Название объекта
+          type: string
+          example: name
