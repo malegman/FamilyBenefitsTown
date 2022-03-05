@@ -5,7 +5,7 @@ import com.example.familybenefitstown.api_model.system.LoginResponse;
 import com.example.familybenefitstown.api_model.system.PreLoginRequest;
 import com.example.familybenefitstown.exception.NotFoundException;
 import com.example.familybenefitstown.resource.R;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import com.example.familybenefitstown.service.inface.SystemService;
 import com.example.familybenefitstown.service.model.ServiceLoginResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -122,19 +122,19 @@ public class SystemController {
   /**
    * Обрабатывает POST запрос "/logout" на выход из системы.
    * Для выполнения запроса клиент должен быть аутентифицирован.
-   * @param userAuth данные пользователя из jwt, отправившего запрос, для получения ID пользователя
+   * @param userData данные пользователя из jwt, отправившего запрос, для получения ID пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @PostMapping(
       value = "/logout")
-  public ResponseEntity<?> logout(@AuthenticationPrincipal JwtAuthenticationUserData userAuth,
+  public ResponseEntity<?> logout(@AuthenticationPrincipal JwtUserData userData,
                                   HttpServletRequest request) {
 
     String userIp = request.getRemoteAddr();
 
     try {
-      systemService.logout(userAuth);
+      systemService.logout(userData);
       return ResponseEntity.status(HttpStatus.OK).build();
 
     } catch (NotFoundException e) {
@@ -148,12 +148,12 @@ public class SystemController {
    * Обрабатывает POST запрос "/refresh" на обновление токена доступа.
    * Для выполнения запроса клиент должен быть аутентифицирован.
    * Помещает токен доступа в заголовок ответа.
-   * @param userAuth данные пользователя из jwt, отправившего запрос, для получения ID пользователя
+   * @param userData данные пользователя из jwt, отправившего запрос, для получения ID пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @PostMapping(value = "/refresh")
-  public ResponseEntity<?> refresh(@AuthenticationPrincipal JwtAuthenticationUserData userAuth,
+  public ResponseEntity<?> refresh(@AuthenticationPrincipal JwtUserData userData,
                                    HttpServletRequest request) {
 
     String userIp = request.getRemoteAddr();
@@ -161,7 +161,7 @@ public class SystemController {
     String jwt;
 
     try {
-      jwt = systemService.refresh(userAuth);
+      jwt = systemService.refresh(userData);
 
     } catch (NotFoundException e) {
       // Не найден пользователь

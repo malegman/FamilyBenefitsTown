@@ -4,7 +4,7 @@ import com.example.familybenefitstown.api_model.user.UserInfo;
 import com.example.familybenefitstown.api_model.user.UserInitData;
 import com.example.familybenefitstown.api_model.user.UserSave;
 import com.example.familybenefitstown.exception.*;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import com.example.familybenefitstown.service.inface.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +84,7 @@ public class UserController {
    * Обрабатывает GET запрос "/users/{id}" на получение информации о пользователе.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
-   * @param userAuth данные пользователя из jwt, отправившего запрос, для получения ID пользователя
+   * @param userData данные пользователя из jwt, отправившего запрос, для получения ID пользователя
    * @param request http запрос
    * @return информация о пользователе, если запрос выполнен успешно, и код ответа
    */
@@ -93,14 +93,14 @@ public class UserController {
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<UserInfo> read(@PathVariable(name = "id") String idUser,
-                                       @AuthenticationPrincipal JwtAuthenticationUserData userAuth,
+                                       @AuthenticationPrincipal JwtUserData userData,
                                        HttpServletRequest request) {
 
     String userIp = request.getRemoteAddr();
 
     // Если пользователь пытается получить информацию не о своем профиле
-    if (!userAuth.getIdUser().equals(idUser)) {
-      log.warn("{} GET \"/admins/{id}\": User with id {} tried to read user with id {}", userIp, userAuth.getIdUser(), idUser);
+    if (!userData.getIdUser().equals(idUser)) {
+      log.warn("{} GET \"/admins/{id}\": User with id {} tried to read user with id {}", userIp, userData.getIdUser(), idUser);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -120,7 +120,7 @@ public class UserController {
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
    * @param userSave объект запроса для сохранения пользователя
-   * @param userAuth данные пользователя из jwt, отправившего запрос, для получения ID пользователя
+   * @param userData данные пользователя из jwt, отправившего запрос, для получения ID пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
@@ -129,14 +129,14 @@ public class UserController {
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> update(@PathVariable(name = "id") String idUser,
                                   @RequestBody UserSave userSave,
-                                  @AuthenticationPrincipal JwtAuthenticationUserData userAuth,
+                                  @AuthenticationPrincipal JwtUserData userData,
                                   HttpServletRequest request) {
 
     String userIp = request.getRemoteAddr();
 
     // Если пользователь пытается обновить не свой профиль
-    if (!userAuth.getIdUser().equals(idUser)) {
-      log.warn("{} PUT \"/admins/{id}\": User with id {} tried to update user with id {}", userIp, userAuth.getIdUser(), idUser);
+    if (!userData.getIdUser().equals(idUser)) {
+      log.warn("{} PUT \"/admins/{id}\": User with id {} tried to update user with id {}", userIp, userData.getIdUser(), idUser);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -172,21 +172,21 @@ public class UserController {
    * Обрабатывает DELETE запрос "/users/{id}" на удаление пользователя.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
-   * @param userAuth данные пользователя из jwt, отправившего запрос, для получения ID пользователя
+   * @param userData данные пользователя из jwt, отправившего запрос, для получения ID пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @DeleteMapping(
       value = "/users/{id}")
   public ResponseEntity<?> delete(@PathVariable(name = "id") String idUser,
-                                  @AuthenticationPrincipal JwtAuthenticationUserData userAuth,
+                                  @AuthenticationPrincipal JwtUserData userData,
                                   HttpServletRequest request) {
 
     String userIp = request.getRemoteAddr();
 
     // Если пользователь пытается удалить не свой профиль
-    if (!userAuth.getIdUser().equals(idUser)) {
-      log.warn("{} PUT \"/admins/{id}\": User with id {} tried to delete user with id {}", userIp, userAuth.getIdUser(), idUser);
+    if (!userData.getIdUser().equals(idUser)) {
+      log.warn("{} PUT \"/admins/{id}\": User with id {} tried to delete user with id {}", userIp, userData.getIdUser(), idUser);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
