@@ -3,7 +3,7 @@ package com.example.familybenefitstown.service.inface;
 import com.example.familybenefitstown.api_model.system.LoginRequest;
 import com.example.familybenefitstown.api_model.system.PreLoginRequest;
 import com.example.familybenefitstown.exception.NotFoundException;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import com.example.familybenefitstown.service.model.ServiceLoginResponse;
 import org.springframework.mail.MailException;
 
@@ -33,17 +33,17 @@ public interface SystemService {
 
   /**
    * Выход из системы
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @throws NotFoundException если не найден пользователь по указанным данным
    */
-  void logout(JwtAuthenticationUserData userAuth) throws NotFoundException;
+  void logout(JwtUserData userData) throws NotFoundException;
 
   /**
    * Обновляет токен доступа пользователя
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @return новый токен доступа jwt
    * @throws NotFoundException если не найден пользователь по указанным данным
    */
-  String refresh(JwtAuthenticationUserData userAuth) throws NotFoundException;
+  String refresh(JwtUserData userData) throws NotFoundException;
 }
 

@@ -14,7 +14,7 @@ import com.example.familybenefitstown.exception.NotFoundException;
 import com.example.familybenefitstown.resource.R;
 import com.example.familybenefitstown.security.service.inface.DBIntegrityService;
 import com.example.familybenefitstown.security.service.inface.TokenCodeService;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import com.example.familybenefitstown.service.inface.DateTimeService;
 import com.example.familybenefitstown.service.inface.MailService;
 import com.example.familybenefitstown.service.inface.SystemService;
@@ -174,13 +174,13 @@ public class SystemServiceFB implements SystemService {
 
   /**
    * Выход из системы
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @throws NotFoundException если не найден пользователь по указанным данным
    */
   @Override
-  public void logout(JwtAuthenticationUserData userAuth) throws NotFoundException {
+  public void logout(JwtUserData userData) throws NotFoundException {
 
-    String idUser = userAuth.getIdUser();
+    String idUser = userData.getIdUser();
 
     // Проверка существования токена пользователя
     dbIntegrityService.checkExistenceById(
@@ -191,21 +191,21 @@ public class SystemServiceFB implements SystemService {
 
   /**
    * Обновляет токен доступа пользователя
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @return новый токен доступа jwt
    * @throws NotFoundException если не найден пользователь по указанным данным
    */
   @Override
-  public String refresh(JwtAuthenticationUserData userAuth) throws NotFoundException {
+  public String refresh(JwtUserData userData) throws NotFoundException {
 
-    String idUser = userAuth.getIdUser();
+    String idUser = userData.getIdUser();
 
     // Проверка существования токена пользователя
     dbIntegrityService.checkExistenceById(
         accessTokenRepository::existsById, idUser);
 
     // Создание jwt
-    String jwt = tokenCodeService.generateJwt(userAuth);
+    String jwt = tokenCodeService.generateJwt(userData);
 
     // Сохранение токена
     accessTokenRepository.saveAndFlush(AccessTokenEntity
