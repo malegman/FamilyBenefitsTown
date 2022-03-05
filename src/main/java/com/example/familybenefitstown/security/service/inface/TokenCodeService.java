@@ -1,7 +1,7 @@
 package com.example.familybenefitstown.security.service.inface;
 
 import com.example.familybenefitstown.dto.entity.RoleEntity;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -24,25 +24,26 @@ public interface TokenCodeService {
 
   /**
    * Генерирует jwt для пользователя на основе его ID, ролей и IP-адреса запроса на вход систему
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @return сгенерированный jwt
    */
-  String generateJwt(JwtAuthenticationUserData userAuth);
+  String generateJwt(JwtUserData userData);
 
   /**
-   * Преобразует строковый токен в объект токена jwt
-   * @param token конвертируемый строковый токен
-   * @return объект токена jwt
-   * @throws RuntimeException если не удалось преобразовать токен
-   */
-  Jws<Claims> toJwt(String token) throws RuntimeException;
-
-  /**
-   * Получает данные авторизации пользователя по токену формата jwt
+   * Извлекает данные пользователя из строки, формата токена jwt
    * @param jwt токен пользователя, jwt
    * @return данные авторизации
+   * @throws RuntimeException если не удалось извлечь данные пользователя из строки
    */
-  JwtAuthenticationUserData authFromJwt(Jws<Claims> jwt);
+  JwtUserData authFromStringJwt(String jwt) throws RuntimeException;
+
+  /**
+   * Проверяет наличие в бд токена jwt по ID данного пользователя.
+   * Таким образом проверяется, был ли осуществлен выход пользователя из системы.
+   * @param idUser ID пользователя
+   * @return true, если токен jwt данного пользователя есть в бд
+   */
+  boolean existsJwtById(String idUser);
 
   /**
    * Создает код для входа в систему.

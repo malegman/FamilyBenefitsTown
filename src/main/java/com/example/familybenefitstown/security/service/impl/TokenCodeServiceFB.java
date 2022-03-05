@@ -1,12 +1,11 @@
 package com.example.familybenefitstown.security.service.impl;
 
 import com.example.familybenefitstown.dto.entity.RoleEntity;
+import com.example.familybenefitstown.dto.repository.AccessTokenRepository;
 import com.example.familybenefitstown.resource.R;
 import com.example.familybenefitstown.security.service.inface.TokenCodeService;
-import com.example.familybenefitstown.security.web.auth.JwtAuthenticationUserData;
+import com.example.familybenefitstown.security.web.auth.JwtUserData;
 import com.example.familybenefitstown.service.inface.DateTimeService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +23,24 @@ import java.util.stream.Collectors;
 public class TokenCodeServiceFB implements TokenCodeService {
 
   /**
+   * Репозиторий, работающий с моделью таблицы "access_token"
+   */
+  private final AccessTokenRepository accessTokenRepository;
+
+  /**
    * Интерфейс сервиса, который предоставляет методы для работы с датой и временем
    */
   private final DateTimeService dateTimeService;
 
   /**
    * Конструктор для инициализации сервиса
+   * @param accessTokenRepository репозиторий, работающий с моделью таблицы "access_token"
    * @param dateTimeService интерфейс сервиса, который предоставляет методы для работы с датой и временем
    */
   @Autowired
-  public TokenCodeServiceFB(DateTimeService dateTimeService) {
+  public TokenCodeServiceFB(AccessTokenRepository accessTokenRepository,
+                            DateTimeService dateTimeService) {
+    this.accessTokenRepository = accessTokenRepository;
     this.dateTimeService = dateTimeService;
   }
 
@@ -48,14 +55,14 @@ public class TokenCodeServiceFB implements TokenCodeService {
   public String generateJwt(String id, Set<RoleEntity> roleEntitySet, HttpServletRequest request) {
 
     return Jwts.builder()
-        .setSubject(JwtAuthenticationUserData
+        .setSubject(JwtUserData
                         .builder()
                         .idUser(id)
                         .nameRoleSet(roleEntitySet
                                          .stream()
                                          .map(RoleEntity::getName)
                                          .collect(Collectors.toSet()))
-                        .ipAddress(request.getRemoteAddr())
+                        .address(request.getRemoteAddr())
                         .build()
                         .toString())
         .setExpiration(dateTimeService.getExpiration(R.JWT_EXPIRATION_SEC))
@@ -65,39 +72,42 @@ public class TokenCodeServiceFB implements TokenCodeService {
 
   /**
    * Генерирует jwt для пользователя на основе его ID, ролей и IP-адреса запроса на вход систему
-   * @param userAuth данные доступа из токена доступа jwt
+   * @param userData данные доступа из токена доступа jwt
    * @return сгенерированный jwt
    */
   @Override
-  public String generateJwt(JwtAuthenticationUserData userAuth) {
+  public String generateJwt(JwtUserData userData) {
     return Jwts.builder()
-        .setSubject(userAuth.toString())
+        .setSubject(userData.toString())
         .setExpiration(dateTimeService.getExpiration(R.JWT_EXPIRATION_SEC))
         .signWith(SignatureAlgorithm.HS512, R.JWT_SECRET)
         .compact();
   }
 
   /**
-   * Преобразует строковый токен в объект токена jwt
-   * @param token конвертируемый строковый токен
-   * @return токен в формате jwt
-   * @throws RuntimeException если не удалось преобразовать токен
+   * Извлекает данные пользователя из строки, формата токена jwt
+   * @param jwt токен пользователя, jwt
+   * @return данные авторизации
+   * @throws RuntimeException если не удалось извлечь данные пользователя из строки
    */
   @Override
-  public Jws<Claims> toJwt(String token) throws RuntimeException {
+  public JwtUserData authFromStringJwt(String jwt) throws RuntimeException {
 
-    return Jwts.parser().setSigningKey(R.JWT_SECRET).parseClaimsJws(token);
+    return JwtUserData.fromString(
+        Jwts.parser().setSigningKey(R.JWT_SECRET)
+            .parseClaimsJws(jwt).getBody().getSubject());
   }
 
   /**
-   * Получает данные авторизации пользователя по токену формата jwt
-   * @param jwt токен доступа пользователя в формате jwt
-   * @return данные авторизации
+   * Проверяет наличие в бд токена jwt по ID данного пользователя.
+   * Таким образом проверяется, был ли осуществлен выход пользователя из системы.
+   * @param idUser ID пользователя
+   * @return true, если токен jwt данного пользователя есть в бд
    */
   @Override
-  public JwtAuthenticationUserData authFromJwt(Jws<Claims> jwt) {
+  public boolean existsJwtById(String idUser) {
 
-    return JwtAuthenticationUserData.fromString(jwt.getBody().getSubject());
+    return accessTokenRepository.existsById(idUser);
   }
 
   /**
