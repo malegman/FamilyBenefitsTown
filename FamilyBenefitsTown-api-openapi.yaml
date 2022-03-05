@@ -546,26 +546,9 @@ paths:
       tags:
         - city
       summary:
-        Возвращает множество городов, в которых есть учреждения и пособия.
-        Фильтр по названию или ID пособия.
+        Возвращает множество городов.
       description:
-        Возвращает множество городов, в которых есть учреждения и пособия.
-        Фильтр по названию или ID пособия.
-      parameters:
-        - name: name
-          in: query
-          description: Название города
-          schema:
-            type: string
-            example: name
-          required: false
-        - name: idBenefit
-          in: query
-          description: ID пособия
-          schema:
-            type: string
-            example: td56387fhj
-          required: false
+        Возвращает множество городов.
       responses:
         '200':
           description: Множество городов получено
@@ -575,9 +558,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ObjectShortInfo'
-        '404':
-          description: Город с указанным названием или пособие с указанным ID не найдены
-          content: { }
       security: [ ]
     post:
       tags:
@@ -702,32 +682,6 @@ paths:
           content: { }
         '404':
           description: Город с указанным ID не найден
-          content: { }
-      security:
-        - bearerAuth: [ ]
-  /cities/partial:
-    get:
-      tags:
-        - city
-      summary: Возвращает множество городов, в которых нет учреждений или пособий
-      description:
-        Возвращает множество городов, в которых нет учреждений или пособий.
-        Для администратора.
-        Необходима аутентификация.
-      responses:
-        '200':
-          description: Множество городов получено
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ObjectShortInfo'
-        '401':
-          description: Клиент не авторизован или токен не действительный
-          content: { }
-        '403':
-          description: Нет доступа
           content: { }
       security:
         - bearerAuth: [ ]
