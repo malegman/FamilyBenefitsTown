@@ -14,14 +14,21 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   /**
    * Находит пользователя по email
    * @param email email пользователя
-   * @return пользователь или empty, если пользователь не найден
+   * @return пользователь или {@code empty}, если пользователь не найден
    */
   Optional<UserEntity> findByEmail(String email);
 
   /**
+   * Возвращает пользователя по email
+   * @param email email пользователя
+   * @return найденный пользователь по email
+   */
+  UserEntity getByEmail(String email);
+
+  /**
    * Проверяет наличие пользователя с указанным email
    * @param email email пользователя
-   * @return true, если пользователь с указанным email существует
+   * @return {@code true}, если пользователь с указанным email существует
    */
   boolean existsByEmail(String email);
 
@@ -29,7 +36,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
    * Проверяет наличие пользователя с отличным от данного ID и данным email
    * @param id ID пользователя
    * @param email email пользователя
-   * @return true, если пользователь с отличным ID и указанным email существует
+   * @return {@code true}, если пользователь с отличным ID и указанным email существует
    */
   boolean existsByIdIsNotAndName(String id, String email);
 
