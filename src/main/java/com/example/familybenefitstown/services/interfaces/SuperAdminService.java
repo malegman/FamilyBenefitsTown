@@ -1,16 +1,15 @@
-package com.example.familybenefitstown.service.inface;
+package com.example.familybenefitstown.services.interfaces;
 
-import com.example.familybenefitstown.api_model.admin.AdminInfo;
-import com.example.familybenefitstown.api_model.admin.AdminSave;
-import com.example.familybenefitstown.exception.AlreadyExistsException;
-import com.example.familybenefitstown.exception.InvalidEmailException;
-import com.example.familybenefitstown.exception.NotFoundException;
-import com.example.familybenefitstown.exception.UserRoleException;
+import com.example.familybenefitstown.api_models.admin.AdminSave;
+import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.exceptions.UserRoleException;
 
 /**
- * Интерфейс сервиса, управляющего объектом "администратор"
+ * Интерфейс сервиса, управляющего объектом "супер-администратор"
  */
-public interface AdminService {
+public interface SuperAdminService {
 
   /**
    * Создает администратора по запросу на сохранение
@@ -19,23 +18,6 @@ public interface AdminService {
    * @throws InvalidEmailException если указанный "email" не является email
    */
   void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException;
-
-  /**
-   * Возвращает администратора по его ID
-   * @param idAdmin ID администратора
-   * @return информация об администраторе
-   */
-  AdminInfo read(String idAdmin) throws NotFoundException;
-
-  /**
-   * Обновляет администратора по запросу на сохранение
-   * @param idAdmin ID администратора
-   * @param adminSave объект запроса на сохранение администратора
-   * @throws NotFoundException если администратор с указанными данными не найден
-   * @throws InvalidEmailException если указанный "email" не является email
-   * @throws AlreadyExistsException если администратор или пользователь с отличным ID и данным email уже существует
-   */
-  void update(String idAdmin, AdminSave adminSave) throws NotFoundException, InvalidEmailException, AlreadyExistsException;
 
   /**
    * Удаляет администратора по его ID или удаляет роль "ROLE_ADMIN" у пользователя
@@ -67,4 +49,3 @@ public interface AdminService {
    */
   void toSuper(String idAdmin) throws NotFoundException;
 }
-
