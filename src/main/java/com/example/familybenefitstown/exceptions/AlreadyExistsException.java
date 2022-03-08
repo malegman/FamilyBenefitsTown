@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.exception;
+package com.example.familybenefitstown.exceptions;
 
 /**
  * Исключение, связанное с существованием объекта в базе данных
