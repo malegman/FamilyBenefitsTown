@@ -1,10 +1,10 @@
-package com.example.familybenefitstown.service.inface;
+package com.example.familybenefitstown.services.interfaces;
 
-import com.example.familybenefitstown.exception.DateFormatException;
-import com.example.familybenefitstown.exception.DateTimeException;
+import com.example.familybenefitstown.exceptions.DateFormatException;
+import com.example.familybenefitstown.exceptions.DateTimeException;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -17,7 +17,7 @@ public interface DateTimeService {
    * @param expireSec число секунд, по окончанию которых истечет срок
    * @return дата истечения срока жизни
    */
-  Date getExpiration(long expireSec);
+  LocalDateTime getExpiration(long expireSec);
 
   /**
    * Преобразует строку формата "dd.mm.yyyy" в дату
@@ -40,6 +40,13 @@ public interface DateTimeService {
    * @throws DateTimeException если проверяемая дата позже текущей даты
    */
   void checkDateBeforeNow(Set<LocalDate> dateSet) throws DateTimeException;
+
+  /**
+   * Проверяет текущее время на предшествие проверяемому времени
+   * @param dateTimeCheck проверяемое время
+   * @throws DateTimeException если текущее время позже проверяемого
+   */
+  void checkDateTimeAfterNow(LocalDateTime dateTimeCheck) throws DateTimeException;
 
   /**
    * Проверяет, был ли день рождения после проверяемой даты

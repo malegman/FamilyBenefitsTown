@@ -1,17 +1,15 @@
-package com.example.familybenefitstown.service.impl;
+package com.example.familybenefitstown.services.implementations;
 
-import com.example.familybenefitstown.exception.DateFormatException;
-import com.example.familybenefitstown.exception.DateTimeException;
-import com.example.familybenefitstown.service.inface.DateTimeService;
+import com.example.familybenefitstown.exceptions.DateFormatException;
+import com.example.familybenefitstown.exceptions.DateTimeException;
+import com.example.familybenefitstown.services.interfaces.DateTimeService;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.TemporalAccessor;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 
@@ -32,12 +30,9 @@ public class DateTimeServiceFB implements DateTimeService {
    * @return дата истечения срока жизни
    */
   @Override
-  public Date getExpiration(long expireSec) {
+  public LocalDateTime getExpiration(long expireSec) {
 
-    return Date.from(LocalDateTime
-                         .now()
-                         .plusSeconds(expireSec)
-                         .toInstant(ZoneOffset.UTC));
+    return LocalDateTime.now().plusSeconds(expireSec);
   }
 
   /**
@@ -82,6 +77,21 @@ public class DateTimeServiceFB implements DateTimeService {
 
     for (LocalDate date : dateSet) {
       checkDateBeforeNow(date);
+    }
+  }
+
+  /**
+   * Проверяет текущее время на предшествие проверяемому времени
+   * @param dateTimeCheck проверяемое время
+   * @throws DateTimeException если текущее время позже проверяемого
+   */
+  @Override
+  public void checkDateTimeAfterNow(LocalDateTime dateTimeCheck) throws DateTimeException {
+
+    LocalDateTime dateTimeCurrent = LocalDateTime.now();
+    if (dateTimeCurrent.isAfter(dateTimeCheck)) {
+      throw new DateTimeException(String.format(
+          "Current time \"%s\" is after check time \"%s\"", dateTimeCurrent, dateTimeCheck));
     }
   }
 
