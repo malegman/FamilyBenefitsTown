@@ -1,9 +1,9 @@
-package com.example.familybenefitstown.service.inface;
+package com.example.familybenefitstown.services.interfaces;
 
-import com.example.familybenefitstown.api_model.user.UserInfo;
-import com.example.familybenefitstown.api_model.user.UserInitData;
-import com.example.familybenefitstown.api_model.user.UserSave;
-import com.example.familybenefitstown.exception.*;
+import com.example.familybenefitstown.api_models.user.UserInfo;
+import com.example.familybenefitstown.api_models.user.UserInitData;
+import com.example.familybenefitstown.api_models.user.UserSave;
+import com.example.familybenefitstown.exceptions.*;
 
 /**
  * Интерфейс сервиса, управляющего объектом "пользователь"
@@ -60,9 +60,16 @@ public interface UserService {
 
   /**
    * Возвращает дополнительные данные для пользователя.
-   * Данные содержат в себе множества кратких информаций о городах и полных критериях
+   * Данные содержат в себе множества кратких информаций о городах
    * @return дополнительные данные для пользователя
    */
   UserInitData getInitData();
+
+  /**
+   * Проверяет существование пользователя по email
+   * @param email почта пользователя
+   * @return {@code true}, если пользователь существует
+   */
+  boolean existsByEmail(String email);
 }
 
