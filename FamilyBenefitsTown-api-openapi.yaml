@@ -8,30 +8,35 @@ info:
 servers:
   - url: http://localhost
 tags:
-  - name: system
-    description: Операции, связанные с системой и безопасностью
+  - name: auth
+    description: Операции, связанные с аутентификацией и авторизацией пользователя в системе
   - name: user
     description: Получение и изменение пользователя
   - name: admin
     description: Получение и изменение администратора
+  - name: super admin
+    description: Операции супер-администратора
   - name: city
     description: Получение и изменение города
 
 
 paths:
-  /pre-login:
+  /auth/pre-login:
     post:
       tags:
-        - system
+        - auth
       summary: Отправляет на указанную почту код для входа в систему
       description:
         Отправляет на указанную почту код для входа в систему.
         Для анонимного клиента.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PreLoginRequest'
+      parameters:
+        - in: query
+          name: e
+          description: email пользователя
+          schema:
+            type: string
+            example: example@email.com
+          required: true
       responses:
         '200':
           description: Вход в систему выполнен
@@ -40,20 +45,29 @@ paths:
           description: Пользователь с указанным email не найден
           content: { }
       security: [ ]
-  /login:
+  /auth/login:
     post:
       tags:
-        - system
+        - auth
       summary: Вход в систему
       description:
         Вход в систему.
         Для анонимного клиента.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-        required: true
+      parameters:
+        - in: query
+          name: e
+          description: email пользователя
+          schema:
+            type: string
+            example: example@email.com
+          required: true
+        - in: query
+          name: lc
+          description: код входа пользователя
+          schema:
+            type: integer
+            example: 123456
+          required: true
       responses:
         '200':
           description: Вход в систему выполнен
@@ -62,7 +76,12 @@ paths:
               schema:
                 description: Токен доступа в формате jwt
                 type: string
-                example: jwt=d6tefy0.fh3653.26r3fyg
+                example: Bearer d6tefy0.fh3653.26r3fyg
+            Set-Cookie:
+              schema:
+                description: Токен восстановления
+                type: string
+                example: refresh=ldkfj4h728fhd; httpOnly
           content:
             application/json:
               schema:
@@ -71,47 +90,22 @@ paths:
           description: Пользователь с указанными данными не найден
           content: { }
       security: [ ]
-  /logout:
+  /auth/logout:
     post:
       tags:
-        - system
+        - auth
       summary: Выход из системы
       description:
         Выход из системы.
         О запросившем клиенте.
         Для администратора. Для пользователя.
-        Необходима аутентификация.
+        Необходима авторизация.
       responses:
         '200':
           description: Выход из системы выполнен
           content: { }
         '401':
           description: Клиент не авторизован или токен не действительный
-          content: { }
-        '403':
-          description: Нет доступа
-          content: { }
-        '404':
-          description: Пользователь с указанными данными не найден
-          content: { }
-      security:
-        - bearerAuth: [ ]
-  /refresh:
-    post:
-      tags:
-        - system
-      summary: Обновление токена доступа
-      description:
-        Обновление токена доступа.
-        О запросившем клиенте.
-        Для администратора. Для пользователя.
-        Необходима аутентификация.
-      responses:
-        '200':
-          description: Токен доступа обновлен
-          content: { }
-        '401':
-          description: Клиент не авторизован
           content: { }
         '403':
           description: Нет доступа
@@ -161,7 +155,7 @@ paths:
         Возвращает информацию о пользователе по ID.
         О запросившем клиенте.
         Для пользователя.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -196,7 +190,7 @@ paths:
         Обновляет данные пользователя.
         О запросившем клиенте.
         Для пользователя.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -245,7 +239,7 @@ paths:
         Удаляет пользователя по ID. Если пользователь имеет роль админа, то удаляются роль пользователя и пользовательские данные.
         О запросившем клиенте.
         Для пользователя.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -287,39 +281,6 @@ paths:
       security: [ ]
 
 
-  /admins:
-    post:
-      tags:
-        - admin
-      summary: Создает администратора
-      description:
-        Создает администратора.
-        Для супер-администратора.
-        Необходима аутентификация.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminSave'
-        required: true
-      responses:
-        '201':
-          description: Администратор создан
-          content: { }
-        '400':
-          description:
-            Варианты -
-            1) администратор или пользователь с данным email уже существует;
-            2) указанный "email" не является email.
-          content: { }
-        '401':
-          description: Клиент не авторизован или токен не действительный
-          content: { }
-        '403':
-          description: Нет доступа
-          content: { }
-      security:
-        - bearerAuth: [ ]
   /admins/{id}:
     get:
       tags:
@@ -329,7 +290,7 @@ paths:
         Возвращает информацию об администраторе по ID.
         О запросившем клиенте.
         Для администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -364,7 +325,7 @@ paths:
         Обновляет данные администратора по ID.
         О запросившем клиенте.
         Для администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -400,6 +361,42 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+
+
+  /sa/admins:
+    post:
+      tags:
+        - super admin
+      summary: Создает администратора
+      description:
+        Создает администратора.
+        Для супер-администратора.
+        Необходима авторизация.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminSave'
+        required: true
+      responses:
+        '201':
+          description: Администратор создан
+          content: { }
+        '400':
+          description:
+            Варианты -
+            1) администратор или пользователь с данным email уже существует;
+            2) указанный "email" не является email.
+          content: { }
+        '401':
+          description: Клиент не авторизован или токен не действительный
+          content: { }
+        '403':
+          description: Нет доступа
+          content: { }
+      security:
+        - bearerAuth: [ ]
+  /sa/admins/{id}:
     delete:
       tags:
         - admin
@@ -407,7 +404,7 @@ paths:
       description:
         Удаляет администратора по ID.
         Для супер администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -434,17 +431,17 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /admins/from-user/{idUser}:
+  /sa/from-user/{id}:
     post:
       tags:
-        - admin
+        - super admin
       summary: Добавляет роль администратора пользователю
       description:
         Добавляет роль администратора пользователю.
         Для супер администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
-        - name: idUser
+        - name: id
           in: path
           description: ID пользователя
           schema:
@@ -469,15 +466,15 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /admins/{id}/to-user:
+  /sa/to-user/{id}:
     post:
       tags:
-        - admin
+        - super admin
       summary: Добавляет роль пользователя администратору
       description:
         Добавляет роль пользователя администратору.
         Для супер администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -504,15 +501,15 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /admins/{id}/to-super:
+  /sa/to-super/{id}:
     post:
       tags:
-        - admin
+        - super admin
       summary: Передает роль супера администратора другому администратору
       description:
         Передает роль супер администратора другому администратору.
         Для супер администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -566,7 +563,7 @@ paths:
       description:
         Создает город.
         Для администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       requestBody:
         content:
           application/json:
@@ -621,7 +618,7 @@ paths:
       description:
         Обновляет город по ID.
         Для администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -661,7 +658,7 @@ paths:
       description:
         Удаляет город по ID.
         Для администратора.
-        Необходима аутентификация.
+        Необходима авторизация.
       parameters:
         - name: id
           in: path
@@ -771,7 +768,7 @@ components:
             example: td56387fhj
     UserInitData:
       description: Дополнительные данные для создания или обновления пользователя.
-        Содержат в себе множества кратких информаций о городах и полных инф. о критериях
+        Содержат в себе множества кратких информаций о городах
       properties:
         shortCitySet:
           description: Множество кратких информаций о городах
@@ -780,24 +777,6 @@ components:
             $ref: '#/components/schemas/ObjectShortInfo'
 
 
-    PreLoginRequest:
-      description: Объект запроса пользователя для получения кода для входа в систему
-      properties:
-        email:
-          description: Электронная почта пользователя
-          type: string
-          example: example@mail.com
-    LoginRequest:
-      description: Объект запроса пользователя для входа в систему
-      properties:
-        email:
-          description: Электронная почта пользователя
-          type: string
-          example: example@mail.com
-        loginCode:
-          description: Код пользователя для входа в систему
-          type: integer
-          example: 111222
     LoginResponse:
       description: Объект ответа на вход в систему
       properties:
