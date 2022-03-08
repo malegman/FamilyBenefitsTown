@@ -51,19 +51,6 @@ public class UserEntity extends ObjectEntity {
   private LocalDate dateBirth;
 
   /**
-   * Дата последнего выбора критерий пользователя
-   */
-  @Nullable
-  @Column(name = "date_select_criterion")
-  private LocalDate dateSelectCriterion;
-
-  /**
-   * Флаг свежести подобранных пособий
-   */
-  @Column(name = "is_fresh_benefits")
-  private boolean isFreshBenefits;
-
-  /**
    * Город пользователя
    */
   @Nullable
