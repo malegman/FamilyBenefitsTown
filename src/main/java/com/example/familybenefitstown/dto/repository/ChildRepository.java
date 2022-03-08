@@ -14,7 +14,7 @@ public interface ChildRepository extends JpaRepository<ChildEntity, String> {
   /**
    * Находит ребенка по дате рождения
    * @param dateBirth дата рождения
-   * @return модель ребенка или empty, если ребенок не найден
+   * @return модель ребенка или {@code empty}, если ребенок не найден
    */
   Optional<ChildEntity> findByDateBirth(LocalDate dateBirth);
 
