@@ -1,6 +1,6 @@
-package com.example.familybenefitstown.api_model.user;
+package com.example.familybenefitstown.api_models.user;
 
-import com.example.familybenefitstown.api_model.common.ObjectShortInfo;
+import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

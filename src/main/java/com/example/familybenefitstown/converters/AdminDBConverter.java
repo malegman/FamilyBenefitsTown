@@ -1,7 +1,7 @@
-package com.example.familybenefitstown.convert;
+package com.example.familybenefitstown.converters;
 
-import com.example.familybenefitstown.api_model.admin.AdminInfo;
-import com.example.familybenefitstown.api_model.admin.AdminSave;
+import com.example.familybenefitstown.api_models.admin.AdminInfo;
+import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.dto.entity.RoleEntity;
 import com.example.familybenefitstown.dto.entity.UserEntity;
 

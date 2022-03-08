@@ -1,8 +1,8 @@
-package com.example.familybenefitstown.convert;
+package com.example.familybenefitstown.converters;
 
-import com.example.familybenefitstown.api_model.city.CityInfo;
-import com.example.familybenefitstown.api_model.city.CitySave;
-import com.example.familybenefitstown.api_model.common.ObjectShortInfo;
+import com.example.familybenefitstown.api_models.city.CityInfo;
+import com.example.familybenefitstown.api_models.city.CitySave;
+import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.dto.entity.CityEntity;
 
 import java.util.function.Function;

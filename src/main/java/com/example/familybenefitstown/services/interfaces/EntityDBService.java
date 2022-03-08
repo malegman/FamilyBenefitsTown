@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.service.inface;
+package com.example.familybenefitstown.services.interfaces;
 
 import com.example.familybenefitstown.dto.entity.ObjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

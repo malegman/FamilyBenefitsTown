@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.api_model.city;
+package com.example.familybenefitstown.api_models.city;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

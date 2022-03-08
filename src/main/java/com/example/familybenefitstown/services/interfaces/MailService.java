@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.service.inface;
+package com.example.familybenefitstown.services.interfaces;
 
 import org.springframework.mail.MailException;
 

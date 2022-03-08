@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.api_model.system;
+package com.example.familybenefitstown.api_models.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
