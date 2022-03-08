@@ -1,12 +1,11 @@
-package com.example.familybenefitstown.security.service.impl;
+package com.example.familybenefitstown.security.services.implementations;
 
 import com.example.familybenefitstown.dto.entity.ObjectEntity;
-import com.example.familybenefitstown.exception.AlreadyExistsException;
-import com.example.familybenefitstown.exception.NotFoundException;
-import com.example.familybenefitstown.security.service.inface.DBIntegrityService;
+import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -42,36 +41,6 @@ public class DBIntegrityServiceFB implements DBIntegrityService {
   public <E extends ObjectEntity> void checkExistenceById(Function<String, Boolean> existFunc, E entity) throws NotFoundException {
 
     checkExistenceById(existFunc, entity.getId());
-  }
-
-  /**
-   * Проверяет существование в базе данных объекта из множества по ID
-   * @param existFunc функция проверки, принимающая параметр типа {@link String} и возвращающая значение типа {@link Boolean}
-   * @param entitySet множество проверяемых объектов
-   * @param <E> Тип проверяемого объекта в множестве
-   * @throws NotFoundException если объект из множества не найден
-   */
-  @Override
-  public <E extends ObjectEntity> void checkExistenceById(Function<String, Boolean> existFunc, Set<E> entitySet) throws NotFoundException {
-
-    for (E entity : entitySet) {
-      checkExistenceById(existFunc, entity.getId());
-    }
-  }
-
-  /**
-   * Проверяет существование в базе данных объекта из множества по его уникальному строковому полю
-   * @param existFunc функция проверки, принимающая параметр типа {@link String} и возвращающая значение типа {@link Boolean}
-   * @param uniqueStr уникальное строковое поле объекта
-   * @throws NotFoundException если объект не найден
-   */
-  @Override
-  public void checkExistenceByUniqStr(Function<String, Boolean> existFunc, String uniqueStr) throws NotFoundException {
-
-    if (!existFunc.apply(uniqueStr)) {
-      throw new NotFoundException(String.format(
-          "Entity with ID \"%s\" not found in repository %s", uniqueStr, existFunc.getClass().getName()));
-    }
   }
 
   /**
