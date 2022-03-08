@@ -1,7 +1,7 @@
 CREATE TABLE family_benefit_town.login_code (
 
   "id_user" TEXT NOT NULL,
-  "code" NUMERIC NOT NULL,
+  "code" INT NOT NULL,
   "date_expiration" TIMESTAMP NOT NULL,
 
   CONSTRAINT login_code_pk PRIMARY KEY ("id_user"),

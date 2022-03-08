@@ -7,8 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.math.BigInteger;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Модель записи таблицы "login_code"
@@ -34,14 +33,13 @@ public class LoginCodeEntity extends ObjectEntity {
   /**
    * Код для входа в систему
    */
-  @NonNull
   @Column(name = "code")
-  private BigInteger code;
+  private int code;
 
   /**
    * Время истечения срока кода
    */
   @NonNull
   @Column(name = "date_expiration")
-  private Date dateExpiration;
+  private LocalDateTime dateExpiration;
 }
