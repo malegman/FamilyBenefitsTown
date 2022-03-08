@@ -7,19 +7,20 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 /**
- * Модель записи таблицы "access_token"
+ * Модель записи таблицы "refresh_token"
  */
 @Entity
-@Table(name = "access_token", schema = "family_benefit_town")
+@Table(name = "refresh_token", schema = "family_benefit_town")
 @Getter
 @Setter
 @ToString
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-public class AccessTokenEntity extends ObjectEntity {
+public class RefreshTokenEntity extends ObjectEntity {
 
   /**
    * ID пользователя
@@ -35,4 +36,11 @@ public class AccessTokenEntity extends ObjectEntity {
   @NonNull
   @Column(name = "token")
   private String token;
+
+  /**
+   * Время истечения срока токена восстановления
+   */
+  @NonNull
+  @Column(name = "date_expiration")
+  private LocalDateTime dateExpiration;
 }
