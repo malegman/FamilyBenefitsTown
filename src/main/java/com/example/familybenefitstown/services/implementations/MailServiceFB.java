@@ -1,7 +1,8 @@
-package com.example.familybenefitstown.service.impl;
+package com.example.familybenefitstown.services.implementations;
 
-import com.example.familybenefitstown.resource.RMail;
-import com.example.familybenefitstown.service.inface.MailService;
+import com.example.familybenefitstown.resources.RMail;
+import com.example.familybenefitstown.services.interfaces.MailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -12,6 +13,7 @@ import java.util.Properties;
 /**
  * Реализация сервиса для отправки сообщений на электронную почту
  */
+@Slf4j
 @Service
 public class MailServiceFB implements MailService {
 
@@ -47,6 +49,7 @@ public class MailServiceFB implements MailService {
   public void sendLoginCode(String to, String nameUser, int loginCode) throws MailException {
 
     send(to, RMail.LOGIN_MESSAGE_SUBJECT, String.format(RMail.LOGIN_MESSAGE_TEXT_PATTERN, nameUser, loginCode));
+    log.info("Message with login code \"{}\" was sent to \"{}\"", loginCode, to);
   }
 
   /**
