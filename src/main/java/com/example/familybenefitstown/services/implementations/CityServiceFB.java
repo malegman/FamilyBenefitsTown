@@ -1,16 +1,17 @@
-package com.example.familybenefitstown.service.impl;
+package com.example.familybenefitstown.services.implementations;
 
-import com.example.familybenefitstown.api_model.city.CityInfo;
-import com.example.familybenefitstown.api_model.city.CitySave;
-import com.example.familybenefitstown.api_model.common.ObjectShortInfo;
-import com.example.familybenefitstown.convert.CityDBConverter;
+import com.example.familybenefitstown.api_models.city.CityInfo;
+import com.example.familybenefitstown.api_models.city.CitySave;
+import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
+import com.example.familybenefitstown.converters.CityDBConverter;
 import com.example.familybenefitstown.dto.entity.CityEntity;
 import com.example.familybenefitstown.dto.repository.CityRepository;
-import com.example.familybenefitstown.exception.AlreadyExistsException;
-import com.example.familybenefitstown.exception.NotFoundException;
-import com.example.familybenefitstown.security.service.inface.DBIntegrityService;
-import com.example.familybenefitstown.service.inface.CityService;
-import com.example.familybenefitstown.service.inface.EntityDBService;
+import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
+import com.example.familybenefitstown.services.interfaces.CityService;
+import com.example.familybenefitstown.services.interfaces.EntityDBService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Реализация сервиса, управляющего объектом "город"
  */
+@Slf4j
 @Service
 public class CityServiceFB implements CityService, EntityDBService<CityEntity, CityRepository> {
 
@@ -47,18 +49,18 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
   }
 
   /**
-   * Возвращает множество городов, в которых есть учреждения и пособия.
-   * Фильтр по названию города и пособию.
-   * В качестве параметра может быть указан null, если данный параметр не участвует в фильтрации
+   * Возвращает множество городов.
+   * Фильтр по названию города.
+   * В качестве параметра может быть указан {@code null}, если данный параметр не участвует в фильтрации
    * @param nameCity Название города
-   * @param idBenefit ID пособия
    * @return множество кратких информаций о городах
    */
   @Override
-  public Set<ObjectShortInfo> readAllFilter(String nameCity, String idBenefit) {
+  public Set<ObjectShortInfo> readAllFilter(String nameCity) {
 
     return findAllFull()
         .stream()
+        .filter(cityEntity -> nameCity == null || cityEntity.getName().equals(nameCity))
         .map(CityDBConverter::toShortInfo)
         .collect(Collectors.toSet());
   }
@@ -81,6 +83,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
         cityRepository::existsByName, cityEntityFromSave.getName());
 
     cityRepository.saveAndFlush(cityEntityFromSave);
+    log.info("DB. City with name \"{}\" created.", citySave.getName());
   }
 
   /**
@@ -92,9 +95,8 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
   @Override
   public CityInfo read(String idCity) throws NotFoundException {
 
-    String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
-
     // Получение города по его ID, если город существует
+    String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
     CityEntity cityEntityFromRequest = cityRepository.findById(prepareIdCity)
         .orElseThrow(() -> new NotFoundException(String.format(
             "City with ID \"%s\" not found", idCity)));
@@ -129,6 +131,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
     cityEntityFromSave.setId(prepareIdCity);
 
     cityRepository.saveAndFlush(cityEntityFromSave);
+    log.info("DB. City with ID \"{}\" updated.", idCity);
   }
 
   /**
@@ -146,19 +149,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
         cityRepository::existsById, prepareIdCity);
 
     cityRepository.deleteById(prepareIdCity);
-  }
-
-  /**
-   * Возвращает множество городов, в которых нет учреждений или пособий
-   * @return множество кратких информаций о городах
-   */
-  @Override
-  public Set<ObjectShortInfo> readAllPartial() {
-
-    return findAllPartial()
-        .stream()
-        .map(CityDBConverter::toShortInfo)
-        .collect(Collectors.toSet());
+    log.info("DB. City with ID \"{}\" deleted.", idCity);
   }
 
   /**
@@ -171,14 +162,13 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
   }
 
   /**
-   * Возвращает множество моделей таблицы "city", в которых есть модели пособий и учреждений
+   * Возвращает множество всех моделей таблицы "city"
    * @return множество моделей таблиц
    */
   @Override
   public Set<CityEntity> findAllFull() {
 
-    return new HashSet<>(cityRepository
-                             .findAll());
+    return new HashSet<>(cityRepository.findAll());
   }
 
   /**
@@ -188,8 +178,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
   @Override
   public Set<CityEntity> findAllPartial() {
 
-    return new HashSet<>(cityRepository
-                             .findAll());
+    return new HashSet<>(cityRepository.findAll());
   }
 }
 
