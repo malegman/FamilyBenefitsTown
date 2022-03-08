@@ -1,6 +1,6 @@
 package com.example.familybenefitstown.security.web.config;
 
-import com.example.familybenefitstown.security.web.filter.FilterFB;
+import com.example.familybenefitstown.security.web.filter.AllRequestsFilterFB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,21 +11,28 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Конфигурация web безопасности
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  private final FilterFB filterFB;
+  private final AllRequestsFilterFB allRequestsFilterFB;
 
   /**
    * Конструктор для инициализации фильтра
-   * @param filterFB фильтр всех входящих http запросов
+   * @param allRequestsFilterFB фильтр всех входящих http запросов
    */
   @Autowired
-  public WebSecurityConfig(FilterFB filterFB) {
-    this.filterFB = filterFB;
+  public WebSecurityConfig(AllRequestsFilterFB allRequestsFilterFB) {
+    this.allRequestsFilterFB = allRequestsFilterFB;
   }
 
+  /**
+   * Возвращает реализацию {@link UserDetailsService}, которая возвращает {@code null} в методе {@code loadUserByUsername}.
+   * @return Реализация сервиса
+   */
   @Bean
   protected UserDetailsService getUserDetailsService() {
     return username -> null;
@@ -40,8 +47,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .anonymous().disable()
         .securityContext().disable()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
+        
         .and()
-        .addFilterAt(filterFB, UsernamePasswordAuthenticationFilter.class);
+        .formLogin().disable()
+        .logout().disable()
+
+        .addFilterAt(allRequestsFilterFB, UsernamePasswordAuthenticationFilter.class);
   }
 }
