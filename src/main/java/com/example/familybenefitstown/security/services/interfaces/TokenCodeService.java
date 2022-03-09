@@ -35,7 +35,7 @@ public interface TokenCodeService {
    * @return данные авторизации
    * @throws RuntimeException если не удалось извлечь данные пользователя из строки
    */
-  JwtUserData authFromStringJwt(String jwt) throws RuntimeException;
+  JwtUserData dataFromJwt(String jwt) throws RuntimeException;
 
   /**
    * Генерирует и сохраняет токен восстановления указанной длины из символов A-Za-z0-9 для указанного пользователя
