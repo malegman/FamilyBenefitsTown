@@ -1,5 +1,6 @@
 package com.example.familybenefitstown.security.web.auth;
 
+import com.example.familybenefitstown.resources.R;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,20 +30,22 @@ public class JwtUserData {
   /**
    * Преобразует строку в объект данных авторизации в jwt
    * @param content строка для преобразования
-   * @return данные авторизации
+   * @return данные авторизации, {@code null} если не удалось преобразовать строку в объект
    */
   public static JwtUserData fromString(String content) {
 
-    Pattern patternAuth = Pattern.compile("^" +
-                                              "id=(?<id>[0-9a-zA-Z]{20})" +
-                                              "roles=(?<roles>[A-Z_,]+)" +
-                                              "$");
-    Matcher matcherAuth = patternAuth.matcher(content);
+    Pattern patternAuth = Pattern.compile(String.format(
+        "^id=(?<id>[0-9a-zA-Z]{%s})roles=(?<roles>[A-Z_,]+)$", R.ID_LENGTH));
+    Matcher matcherData = patternAuth.matcher(content);
+
+    if (!matcherData.matches()) {
+      return null;
+    }
 
     return JwtUserData
         .builder()
-        .idUser(matcherAuth.group("id"))
-        .nameRoleSet(new HashSet<>(List.of(matcherAuth.group("roles").split(","))))
+        .idUser(matcherData.group("id"))
+        .nameRoleSet(new HashSet<>(List.of(matcherData.group("roles").split(","))))
         .build();
   }
 
