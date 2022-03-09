@@ -30,31 +30,38 @@ public class RequestChecker {
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/cities/(id)"
    */
-  private static final Pattern PATTERN_CITIES_ID = Pattern.compile("^/cities/(?<id>.+)$");
+  private static final Pattern PATTERN_CITIES_ID = Pattern.compile(String.format(
+      "^/cities/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/users/(id)"
    */
-  private static final Pattern PATTERN_USERS_ID = Pattern.compile("^/users/(?<id>.+)$");
+  private static final Pattern PATTERN_USERS_ID = Pattern.compile(String.format(
+      "^/users/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/admins/(id)"
    */
-  private static final Pattern PATTERN_ADMINS_ID = Pattern.compile("^/admins/(?<id>.+)$");
+  private static final Pattern PATTERN_ADMINS_ID = Pattern.compile(String.format(
+      "^/admins/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/sa/admins/(id)"
    */
-  private static final Pattern PATTERN_SA_ADMINS_ID = Pattern.compile("^/sa/admins/(?<id>.+)$");
+  private static final Pattern PATTERN_SA_ADMINS_ID = Pattern.compile(String.format(
+      "^/sa/admins/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/sa/from-user/(id)"
    */
-  private static final Pattern PATTERN_SA_FROM_USER_ID = Pattern.compile("^/sa/from-user/(?<id>.+)$");
+  private static final Pattern PATTERN_SA_FROM_USER_ID = Pattern.compile(String.format(
+      "^/sa/from-user/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/sa/to-user/(id)"
    */
-  private static final Pattern PATTERN_SA_TO_USER_ID = Pattern.compile("^/sa/to-user/(?<id>.+)$");
+  private static final Pattern PATTERN_SA_TO_USER_ID = Pattern.compile(String.format(
+      "^/sa/to-user/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
   /**
    * Шаблон для проверки соответствия и извлечения параметра (id) из запроса "/sa/to-super/(id)"
    */
-  private static final Pattern PATTERN_SA_TO_SUPER_ID = Pattern.compile("^/sa/to-super/(?<id>.+)$");
+  private static final Pattern PATTERN_SA_TO_SUPER_ID = Pattern.compile(String.format(
+      "^/sa/to-super/(?<id>[A-Za-z0-9]{%s})$", R.ID_LENGTH));
 
   /**
    * IP-адрес, с которого был выполнен запрос
@@ -375,7 +382,7 @@ public class RequestChecker {
     try {
       idUser = tokenCodeService.getIdOfNotExpiredRefreshToken(requestRefreshToken);
     } catch (DateTimeException | NotFoundException e) {
-      log.warn("{} {} \"{}\": Refresh token's exceptions. {}", requestAddress, requestMethod, requestURI, e);
+      log.warn("{} {} \"{}\": Refresh token's exceptions. {}", requestAddress, requestMethod, requestURI, e.getMessage());
       return true;
     }
 
@@ -383,7 +390,7 @@ public class RequestChecker {
 
     // Проверка токена jwt
     try {
-      userData = tokenCodeService.authFromStringJwt(requestJwt);
+      userData = tokenCodeService.dataFromJwt(requestJwt);
 
     } catch (ExpiredJwtException e) {
       // Токен jwt истек, но корректный.
@@ -392,7 +399,7 @@ public class RequestChecker {
         newAuthTokens = tokenCodeService.generateAuthTokens(idUser);
       } catch (NotFoundException ex) {
         // Не найден пользователь
-        log.warn("{} {} \"{}\": Authentication exceptions. {}", requestAddress, requestMethod, requestURI, ex);
+        log.warn("{} {} \"{}\": Authentication exceptions. {}", requestAddress, requestMethod, requestURI, ex.getMessage());
         return true;
       }
       // Установка токенов в заголовки http ответа
@@ -403,7 +410,7 @@ public class RequestChecker {
       // Удаление токена восстановления.
       tokenCodeService.removeRefreshToken(requestRefreshToken);
       log.warn("{} {} \"{}\": Incorrect jwt \"{}\" from the user with id \"{}\". {}",
-               requestAddress, requestMethod, requestURI, requestJwt, idUser, e);
+               requestAddress, requestMethod, requestURI, requestJwt, idUser, e.getMessage());
       return true;
     }
 
