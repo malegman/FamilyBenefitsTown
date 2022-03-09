@@ -119,11 +119,11 @@ public class TokenCodeServiceFB implements TokenCodeService {
   /**
    * Извлекает данные пользователя из строки, формата токена jwt
    * @param jwt токен пользователя, jwt
-   * @return данные авторизации
+   * @return данные пользователя
    * @throws RuntimeException если не удалось извлечь данные пользователя из строки
    */
   @Override
-  public JwtUserData authFromStringJwt(String jwt) throws RuntimeException {
+  public JwtUserData dataFromJwt(String jwt) throws RuntimeException {
 
     return JwtUserData.fromString(
         Jwts.parser().setSigningKey(R.JWT_SECRET)
@@ -199,16 +199,19 @@ public class TokenCodeServiceFB implements TokenCodeService {
   public int generateAndSaveLoginCode(String idUser) {
 
     byte[] randBytes = new byte[R.LOGIN_CODE_LENGTH];
-    int loginCode = 0;
 
+    // Для пропорционального приведения диапазона [0-255] к диапазону [1-9], для первой цифры кода
+    double part1 = 9 / 256.0;
     // Для пропорционального приведения диапазона [0-255] к диапазону [0-9]
     double part = 10 / 256.0;
 
     // Получение случайных значений
     (new SecureRandom()).nextBytes(randBytes);
 
-    // "Заполнение" числа цифрами
-    for (int randI = 0, tempVal = 1; randI < R.LOGIN_CODE_LENGTH; randI++, tempVal *= 10) {
+    // Добавление первой цифры из диапазона [1-9]
+    int loginCode = ((int) Math.floor((randBytes[0] + 128) * part1)) + 1;
+    // Заполнение числа оставшимися цифрами
+    for (int randI = 1, tempVal = 10; randI < R.LOGIN_CODE_LENGTH; randI++, tempVal *= 10) {
       loginCode += tempVal * (int) Math.floor((randBytes[randI] + 128) * part);
     }
 
@@ -244,7 +247,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
   }
 
   /**
-   * Извлекает токен восстановления из запроса клиента. null, если токен не найден
+   * Извлекает токен восстановления из запроса клиента. {@code null}, если токен не найден
    * @param request запрос клиента
    * @return токен восстановления пользователя или null, если токен не найден
    */
