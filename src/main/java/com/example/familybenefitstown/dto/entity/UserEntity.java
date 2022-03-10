@@ -75,7 +75,7 @@ public class UserEntity extends ObjectEntity {
    */
   @NonNull
   @ToString.Exclude
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "users_roles", schema = "family_benefit_town",
       joinColumns = @JoinColumn(name = "id_user"),
@@ -83,46 +83,27 @@ public class UserEntity extends ObjectEntity {
   private Set<RoleEntity> roleEntitySet;
 
   /**
-   * Добавляет пользователю роль по её названию
-   * @param nameRole название добавляемой роли
+   * Добавляет пользователю роль
+   * @param role добавляемая роль
    */
-  public void addRole(String nameRole) {
-    roleEntitySet.add(RoleEntity.builder().name(nameRole).build());
+  public void addRole(RoleEntity role) {
+    roleEntitySet.add(role);
   }
 
   /**
    * Проверяет наличие роли у пользователя
-   * @param nameRole название роли, наличие которой необходимо проверить
-   * @return true, если пользователь имеет роль с указанным именем
+   * @param role роль, наличие которой необходимо проверить
+   * @return true, если пользователь имеет указанную роль
    */
-  public boolean hasRole(String nameRole) {
-
-    for (RoleEntity roleEntity : roleEntitySet) {
-      if (roleEntity.getName().equals(nameRole)) {
-        return true;
-      }
-    }
-
-    return false;
+  public boolean hasRole(RoleEntity role) {
+    return roleEntitySet.contains(role);
   }
 
   /**
-   * Удаляет у пользователя роль по её названию
-   * @param nameRole название удаляемой роли
+   * Удаляет у пользователя роль
+   * @param role удаляемая роль
    */
-  public void removeRole(String nameRole) {
-
-    RoleEntity roleEntityToRemove = null;
-
-    for (RoleEntity roleEntity : roleEntitySet) {
-      if (roleEntity.getName().equals(nameRole)) {
-        roleEntityToRemove = roleEntity;
-        break;
-      }
-    }
-
-    if (roleEntityToRemove != null) {
-      roleEntitySet.remove(roleEntityToRemove);
-    }
+  public void removeRole(RoleEntity role) {
+    roleEntitySet.remove(role);
   }
 }
