@@ -1,5 +1,6 @@
 package com.example.familybenefitstown.security.services.interfaces;
 
+import com.example.familybenefitstown.dto.entity.RoleEntity;
 import com.example.familybenefitstown.dto.entity.UserEntity;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
@@ -18,20 +19,20 @@ public interface UserSecurityService {
   void checkEmailElseThrow(String email) throws InvalidEmailException;
 
   /**
-   * Проверяет наличие указанной роли по её названию у указанной модели таблицы "user"
+   * Проверяет наличие указанной роли у указанной модели таблицы "user"
    * @param userEntity модель таблицы "user", роль которой необходимо проверить
-   * @param nameRole название проверяемой роли
+   * @param role проверяемая роль
    * @param nameTypeObject название проверяемого объекта
    * @throws NotFoundException если модель не имеет роль и связано с отсутствием объекта в бд
    */
-  void checkHasRoleElseThrowNotFound(UserEntity userEntity, String nameRole, String nameTypeObject) throws NotFoundException;
+  void checkHasRoleElseThrowNotFound(UserEntity userEntity, RoleEntity role, String nameTypeObject) throws NotFoundException;
 
   /**
-   * Проверяет отсутствие указанной роли по её названию у указанной модели таблицы "user"
+   * Проверяет наличие указанной роли у указанной модели таблицы "user"
    * @param userEntity модель таблицы "user", роль которой необходимо проверить
-   * @param nameRole название проверяемой роли
+   * @param role проверяемая роль
    * @param nameTypeObject название проверяемого объекта
    * @throws UserRoleException если модель имеет роль
    */
-  void checkNotHasRoleElseThrowUserRole(UserEntity userEntity, String nameRole, String nameTypeObject) throws UserRoleException;
+  void checkNotHasRoleElseThrowUserRole(UserEntity userEntity, RoleEntity role, String nameTypeObject) throws UserRoleException;
 }

@@ -1,5 +1,6 @@
 package com.example.familybenefitstown.security.services.implementations;
 
+import com.example.familybenefitstown.dto.entity.RoleEntity;
 import com.example.familybenefitstown.dto.entity.UserEntity;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
@@ -32,34 +33,34 @@ public class UserSecurityServiceFB implements UserSecurityService {
   }
 
   /**
-   * Проверяет наличие указанной роли по её названию у указанной модели таблицы "user"
+   * Проверяет наличие указанной роли у указанной модели таблицы "user"
    * @param userEntity модель таблицы "user", роль которой необходимо проверить
-   * @param nameRole название проверяемой роли
+   * @param role проверяемая роль
    * @param nameTypeObject название проверяемого объекта
    * @throws NotFoundException если модель не имеет роль и связано с отсутствием объекта в бд
    */
   @Override
-  public void checkHasRoleElseThrowNotFound(UserEntity userEntity, String nameRole, String nameTypeObject) throws NotFoundException {
+  public void checkHasRoleElseThrowNotFound(UserEntity userEntity, RoleEntity role, String nameTypeObject) throws NotFoundException {
 
-    if (!userEntity.hasRole(nameRole)) {
+    if (!userEntity.hasRole(role)) {
       throw new NotFoundException(String.format(
           "%s with ID \"%s\" not found", nameTypeObject, userEntity.getId()));
     }
   }
 
   /**
-   * Проверяет отсутствие указанной роли по её названию у указанной модели таблицы "user"
+   * Проверяет отсутствие указанной роли у указанной модели таблицы "user"
    * @param userEntity модель таблицы "user", роль которой необходимо проверить
-   * @param nameRole название проверяемой роли
+   * @param role проверяемая роль
    * @param nameTypeObject название проверяемого объекта
    * @throws UserRoleException если модель имеет роль
    */
   @Override
-  public void checkNotHasRoleElseThrowUserRole(UserEntity userEntity, String nameRole, String nameTypeObject) throws UserRoleException {
+  public void checkNotHasRoleElseThrowUserRole(UserEntity userEntity, RoleEntity role, String nameTypeObject) throws UserRoleException {
 
-    if (userEntity.hasRole(nameRole)) {
+    if (userEntity.hasRole(role)) {
       throw new UserRoleException(String.format(
-          "%s with ID \"%s\" hasn't got role \"%s\"", nameTypeObject, userEntity.getId(), nameRole));
+          "%s with ID \"%s\" hasn't got role \"%s\"", nameTypeObject, userEntity.getId(), role.getName()));
     }
   }
 }
