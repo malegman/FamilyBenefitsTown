@@ -13,6 +13,8 @@ import com.example.familybenefitstown.dto.repository.CityRepository;
 import com.example.familybenefitstown.dto.repository.UserRepository;
 import com.example.familybenefitstown.exceptions.*;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.resources.RDB;
+import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.security.services.interfaces.UserSecurityService;
@@ -136,7 +138,8 @@ public class UserServiceFB implements UserService {
     dateTimeService.checkDateBeforeNow(userEntityFromSave.getChildEntitySet()
                                            .stream().map(ChildEntity::getDateBirth).collect(Collectors.toSet()));
 
-    userEntityFromSave.addRole(R.ROLE_USER);
+    userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
+    userEntityFromSave.addRole(RDB.ROLE_USER);
 
     userRepository.saveAndFlush(userEntityFromSave);
     log.info("DB. User with email \"{}\" created.", userSave.getEmail());
@@ -226,10 +229,10 @@ public class UserServiceFB implements UserService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
 
     // Если есть роль "ROLE_ADMIN", удаление роли "ROLE_USER", иначе удаление пользователя и его токена восстановления
-    if (userEntityFromRequest.hasRole(R.ROLE_ADMIN)) {
-      userEntityFromRequest.removeRole(R.ROLE_USER);
+    if (userEntityFromRequest.hasRole(RDB.ROLE_ADMIN)) {
+      userEntityFromRequest.removeRole(RDB.ROLE_USER);
       userRepository.saveAndFlush(userEntityFromRequest);
-      log.info("DB. User with ID \"{}\" updated. Removed role \"{}\"", idUser, R.ROLE_USER);
+      log.info("DB. User with ID \"{}\" updated. Removed role \"{}\"", idUser, RDB.NAME_ROLE_USER);
     } else {
       userRepository.deleteById(prepareIdUser);
       log.info("DB. User with ID \"{}\" deleted.", idUser);

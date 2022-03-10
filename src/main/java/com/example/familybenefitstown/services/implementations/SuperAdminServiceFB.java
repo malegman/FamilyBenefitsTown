@@ -9,6 +9,8 @@ import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.exceptions.UserRoleException;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.resources.RDB;
+import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.security.services.interfaces.UserSecurityService;
@@ -81,7 +83,8 @@ public class SuperAdminServiceFB implements SuperAdminService {
     dbIntegrityService.checkAbsenceByUniqStr(
         userRepository::existsByEmail, userEntityFromSave.getEmail());
 
-    userEntityFromSave.addRole(R.ROLE_ADMIN);
+    userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
+    userEntityFromSave.addRole(RDB.ROLE_ADMIN);
 
     userRepository.saveAndFlush(userEntityFromSave);
     log.info("DB. Administrator with email \"{}\" created.", adminSave.getEmail());
@@ -101,13 +104,13 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     userSecurityService.checkHasRoleElseThrowNotFound(
-        userEntityFromRequest, R.ROLE_ADMIN, R.CLIENT_ADMIN);
+        userEntityFromRequest, RDB.ROLE_ADMIN, R.CLIENT_ADMIN);
 
     // Если есть роль "ROLE_USER", удаление роли "ROLE_ADMIN", иначе удаление пользователя и его токена восстановления с кодом входа
-    if (userEntityFromRequest.hasRole(R.ROLE_USER)) {
-      userEntityFromRequest.removeRole(R.ROLE_ADMIN);
+    if (userEntityFromRequest.hasRole(RDB.ROLE_USER)) {
+      userEntityFromRequest.removeRole(RDB.ROLE_ADMIN);
       userRepository.saveAndFlush(userEntityFromRequest);
-      log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\".", idAdmin, R.ROLE_ADMIN);
+      log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\".", idAdmin, RDB.NAME_ROLE_ADMIN);
     } else {
       userRepository.deleteById(prepareIdAdmin);
       log.info("DB. Administrator with ID \"{}\" deleted.", idAdmin);
@@ -130,16 +133,16 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
     // Проверка наличия роли "ROLE_USER" у пользователя
     userSecurityService.checkHasRoleElseThrowNotFound(
-        userEntityFromRequest, R.ROLE_USER, R.CLIENT_USER);
+        userEntityFromRequest, RDB.ROLE_USER, R.CLIENT_USER);
 
     // Проверка отсутствия роли "ROLE_ADMIN" у пользователя
     userSecurityService.checkNotHasRoleElseThrowUserRole(
-        userEntityFromRequest, R.ROLE_ADMIN, R.CLIENT_USER);
+        userEntityFromRequest, RDB.ROLE_ADMIN, R.CLIENT_USER);
 
-    userEntityFromRequest.addRole(R.ROLE_ADMIN);
+    userEntityFromRequest.addRole(RDB.ROLE_ADMIN);
 
     userRepository.saveAndFlush(userEntityFromRequest);
-    log.info("DB. User with ID \"{}\" updated. Added role \"{}\"", idUser, R.ROLE_ADMIN);
+    log.info("DB. User with ID \"{}\" updated. Added role \"{}\"", idUser, RDB.NAME_ROLE_ADMIN);
   }
 
   /**
@@ -157,16 +160,16 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     userSecurityService.checkHasRoleElseThrowNotFound(
-        userEntityFromRequest, R.ROLE_ADMIN, R.CLIENT_ADMIN);
+        userEntityFromRequest, RDB.ROLE_ADMIN, R.CLIENT_ADMIN);
 
     // Проверка отсутствия роли "ROLE_USER" у пользователя
     userSecurityService.checkNotHasRoleElseThrowUserRole(
-        userEntityFromRequest, R.ROLE_USER, R.CLIENT_ADMIN);
+        userEntityFromRequest, RDB.ROLE_USER, R.CLIENT_ADMIN);
 
-    userEntityFromRequest.addRole(R.ROLE_USER);
+    userEntityFromRequest.addRole(RDB.ROLE_USER);
 
     userRepository.saveAndFlush(userEntityFromRequest);
-    log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, R.ROLE_USER);
+    log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, RDB.NAME_ROLE_USER);
   }
 
   /**
@@ -183,17 +186,17 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     userSecurityService.checkHasRoleElseThrowNotFound(
-        userEntityFromRequest, R.ROLE_ADMIN, R.CLIENT_ADMIN);
+        userEntityFromRequest, RDB.ROLE_ADMIN, R.CLIENT_ADMIN);
 
     // Передача роли "ROLE_SUPER_ADMIN"
     UserEntity userEntitySuperAdmin = userRepository.getSuperAdmin();
-    userEntitySuperAdmin.removeRole(R.ROLE_SUPER_ADMIN);
-    userEntityFromRequest.addRole(R.ROLE_SUPER_ADMIN);
+    userEntitySuperAdmin.removeRole(RDB.ROLE_SUPER_ADMIN);
+    userEntityFromRequest.addRole(RDB.ROLE_SUPER_ADMIN);
 
     userRepository.saveAndFlush(userEntitySuperAdmin);
-    log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\"", idAdmin, R.ROLE_SUPER_ADMIN);
+    log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\"", idAdmin, RDB.ROLE_SUPER_ADMIN);
     userRepository.saveAndFlush(userEntityFromRequest);
-    log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, R.ROLE_SUPER_ADMIN);
+    log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, RDB.ROLE_SUPER_ADMIN);
   }
 
   /**
