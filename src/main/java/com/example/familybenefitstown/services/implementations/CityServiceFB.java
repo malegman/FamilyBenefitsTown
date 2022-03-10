@@ -8,6 +8,8 @@ import com.example.familybenefitstown.dto.entity.CityEntity;
 import com.example.familybenefitstown.dto.repository.CityRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.services.interfaces.CityService;
 import com.example.familybenefitstown.services.interfaces.EntityDBService;
@@ -81,6 +83,8 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
     // Проверка отсутствия города по его названию
     dbIntegrityService.checkAbsenceByUniqStr(
         cityRepository::existsByName, cityEntityFromSave.getName());
+
+    cityEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
 
     cityRepository.saveAndFlush(cityEntityFromSave);
     log.info("DB. City with name \"{}\" created.", citySave.getName());
