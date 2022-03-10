@@ -9,6 +9,7 @@ import com.example.familybenefitstown.dto.repository.RoleRepository;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.security.web.auth.AuthTokens;
@@ -23,7 +24,6 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.security.SecureRandom;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Set;
@@ -35,10 +35,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class TokenCodeServiceFB implements TokenCodeService {
-
-  private static final char[] REFRESH_SYMBOLS = {'0','1','2','3','4','5','6','7','8','9',
-      'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-      'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 
   /**
    * Репозиторий, работающий с моделью таблицы "access_token"
@@ -138,23 +134,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
   @Override
   public String generateAndSaveRefreshToken(String idUser) {
 
-    byte[] randBytes = new byte[R.REFRESH_LENGTH];
-    StringBuilder refresh = new StringBuilder();
-
-    int countRefSymbols = REFRESH_SYMBOLS.length;
-
-    // Для пропорционального приведения диапазона [0-255] к диапазону [0-REFRESH_SYMBOLS.length]
-    double part = countRefSymbols / 256.0;
-
-    // Получение случайных значений
-    (new SecureRandom()).nextBytes(randBytes);
-
-    // Заполнение токена символами
-    for (int randI = 0; randI < R.REFRESH_LENGTH; randI++) {
-      refresh.append(REFRESH_SYMBOLS[(int) Math.floor((randBytes[randI] + 128) * part)]);
-    }
-
-    String refreshToken = refresh.toString();
+    String refreshToken = RandomValue.randomString(R.REFRESH_LENGTH);
 
     // Сохранение токена восстановления
     refreshTokenRepository.saveAndFlush(RefreshTokenEntity
@@ -163,7 +143,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
                                             .token(refreshToken)
                                             .dateExpiration(dateTimeService.getExpiration(R.REFRESH_EXPIRATION_SEC))
                                             .build());
-    log.info("DB. Refresh token \"{}\" created for the user with id \"{}\"", refresh, idUser);
+    log.info("DB. Refresh token \"{}\" created for the user with id \"{}\"", refreshToken, idUser);
 
     return refreshToken;
   }
@@ -198,22 +178,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
   @Override
   public int generateAndSaveLoginCode(String idUser) {
 
-    byte[] randBytes = new byte[R.LOGIN_CODE_LENGTH];
-
-    // Для пропорционального приведения диапазона [0-255] к диапазону [1-9], для первой цифры кода
-    double part1 = 9 / 256.0;
-    // Для пропорционального приведения диапазона [0-255] к диапазону [0-9]
-    double part = 10 / 256.0;
-
-    // Получение случайных значений
-    (new SecureRandom()).nextBytes(randBytes);
-
-    // Добавление первой цифры из диапазона [1-9]
-    int loginCode = ((int) Math.floor((randBytes[0] + 128) * part1)) + 1;
-    // Заполнение числа оставшимися цифрами
-    for (int randI = 1, tempVal = 10; randI < R.LOGIN_CODE_LENGTH; randI++, tempVal *= 10) {
-      loginCode += tempVal * (int) Math.floor((randBytes[randI] + 128) * part);
-    }
+    int loginCode = RandomValue.randomInteger(R.LOGIN_CODE_LENGTH);
 
     // Сохранение кода в бд
     loginCodeRepository.saveAndFlush(LoginCodeEntity.builder()
