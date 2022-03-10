@@ -3,6 +3,7 @@ package com.example.familybenefitstown.security.web.filter;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.resources.RDB;
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.security.web.auth.AuthTokens;
 import com.example.familybenefitstown.security.web.auth.JwtUserData;
@@ -151,7 +152,7 @@ public class RequestChecker {
         return new RequestCheckResponse(false, responseAfterCheck);
       }
       // Проверка авторизации по наличию необходимых ролей
-      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(R.ROLE_ADMIN))) {
+      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(RDB.NAME_ROLE_ADMIN))) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
       }
@@ -200,7 +201,7 @@ public class RequestChecker {
         return new RequestCheckResponse(false, responseAfterCheck);
       }
       // Проверка авторизации по наличию необходимых ролей и соответствию ID пользователя ID ресурса
-      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(R.ROLE_USER)) ||
+      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(RDB.NAME_ROLE_USER)) ||
           notEqualsId(userData.getIdUser(), matcherUsersId.group("id"))) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
@@ -234,7 +235,7 @@ public class RequestChecker {
         return new RequestCheckResponse(false, responseAfterCheck);
       }
       // Проверка авторизации по наличию необходимых ролей и соответствию ID пользователя ID ресурса
-      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(R.ROLE_ADMIN)) ||
+      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(RDB.NAME_ROLE_ADMIN)) ||
           notEqualsId(userData.getIdUser(), matcherAdminsId.group("id"))) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
@@ -272,7 +273,7 @@ public class RequestChecker {
         return new RequestCheckResponse(false, responseAfterCheck);
       }
       // Проверка авторизации по наличию необходимых ролей
-      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(R.ROLE_SUPER_ADMIN))) {
+      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(RDB.NAME_ROLE_SUPER_ADMIN))) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
       }
@@ -290,7 +291,7 @@ public class RequestChecker {
       }
       // Проверка авторизации по наличию необходимых ролей и не совпадению ID
       String requestIdUser = isSaAdminsId ? matcherSaAdminsId.group("id") : matcherSaToSuperId.group("id");
-      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(R.ROLE_SUPER_ADMIN)) ||
+      if (notHasRole(userData.getNameRoleSet(), Collections.singleton(RDB.NAME_ROLE_SUPER_ADMIN)) ||
           !notEqualsId(userData.getIdUser(), requestIdUser)) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
@@ -350,7 +351,7 @@ public class RequestChecker {
         return new RequestCheckResponse(false, responseAfterCheck);
       }
       // Проверка авторизации по наличию необходимых ролей
-      if (notHasRole(userData.getNameRoleSet(), Set.of(R.ROLE_USER, R.ROLE_ADMIN))) {
+      if (notHasRole(userData.getNameRoleSet(), Set.of(RDB.NAME_ROLE_USER, RDB.NAME_ROLE_ADMIN))) {
         responseAfterCheck.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return new RequestCheckResponse(false, responseAfterCheck);
       }
