@@ -1,13 +1,13 @@
 package com.example.familybenefitstown.security.services.interfaces;
 
-import com.example.familybenefitstown.dto.entity.RoleEntity;
+import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.web.auth.AuthTokens;
 import com.example.familybenefitstown.security.web.auth.JwtUserData;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
@@ -17,10 +17,10 @@ public interface TokenCodeService {
   /**
    * Генерирует jwt для пользователя на основе его ID, ролей и IP-адреса запроса на вход систему
    * @param id ID пользователя
-   * @param roleEntitySet множество ролей пользователя
+   * @param roleEntityList список ролей пользователя
    * @return сгенерированный jwt
    */
-  String generateJwt(String id, Set<RoleEntity> roleEntitySet);
+  String generateJwt(String id, List<RoleEntity> roleEntityList);
 
   /**
    * Генерирует jwt для пользователя на основе его ID, ролей и IP-адреса запроса на вход систему

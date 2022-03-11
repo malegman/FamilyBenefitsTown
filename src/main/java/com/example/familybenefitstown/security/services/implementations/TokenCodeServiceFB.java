@@ -1,11 +1,11 @@
 package com.example.familybenefitstown.security.services.implementations;
 
-import com.example.familybenefitstown.dto.entity.LoginCodeEntity;
-import com.example.familybenefitstown.dto.entity.RefreshTokenEntity;
-import com.example.familybenefitstown.dto.entity.RoleEntity;
-import com.example.familybenefitstown.dto.repository.LoginCodeRepository;
-import com.example.familybenefitstown.dto.repository.RefreshTokenRepository;
-import com.example.familybenefitstown.dto.repository.RoleRepository;
+import com.example.familybenefitstown.dto.entities.strong.LoginCodeEntity;
+import com.example.familybenefitstown.dto.entities.strong.RefreshTokenEntity;
+import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
+import com.example.familybenefitstown.dto.repositories.strong.LoginCodeRepository;
+import com.example.familybenefitstown.dto.repositories.strong.RefreshTokenRepository;
+import com.example.familybenefitstown.dto.repositories.strong.RoleRepository;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;
@@ -26,7 +26,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZoneOffset;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -81,16 +81,16 @@ public class TokenCodeServiceFB implements TokenCodeService {
   /**
    * Генерирует jwt для пользователя на основе его ID, ролей и IP-адреса запроса на вход систему
    * @param id ID пользователя
-   * @param roleEntitySet множество ролей пользователя
+   * @param roleEntityList список ролей пользователя
    * @return сгенерированный jwt
    */
   @Override
-  public String generateJwt(String id, Set<RoleEntity> roleEntitySet) {
+  public String generateJwt(String id, List<RoleEntity> roleEntityList) {
 
     return generateJwt(JwtUserData
                            .builder()
                            .idUser(id)
-                           .nameRoleSet(roleEntitySet
+                           .nameRoleSet(roleEntityList
                                             .stream()
                                             .map(RoleEntity::getName)
                                             .collect(Collectors.toSet()))
@@ -270,7 +270,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
 
     // Проверка существования пользователя по его ролям
     String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    Set<RoleEntity> roleEntitySet = roleRepository.findAllByIdUser(prepareIdUser);
+    List<RoleEntity> roleEntitySet = roleRepository.findAllByIdUser(prepareIdUser);
     if (roleEntitySet.isEmpty()) {
       throw new NotFoundException(String.format(
           "User with ID \"%s\" not found", idUser));
