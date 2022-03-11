@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Информация об администраторе
@@ -36,8 +36,8 @@ public class AdminInfo {
   private String email;
 
   /**
-   * Множество названий ролей администратора
+   * Список названий ролей администратора
    */
   @JsonProperty("nameRoleSet")
-  private Set<String> nameRoleSet;
+  private List<String> nameRoleSet;
 }

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Объект запроса для сохранения пользователя, создания или обновления
@@ -30,10 +30,10 @@ public class UserSave {
   private String email;
 
   /**
-   * Множество дат рождений детей пользователя
+   * Список дат рождений детей пользователя
    */
   @JsonProperty("birthDateChildren")
-  private Set<String> birthDateChildren;
+  private List<String> birthDateChildren;
 
   /**
    * Дата рождения пользователя

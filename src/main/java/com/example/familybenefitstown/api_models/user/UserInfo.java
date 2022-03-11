@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Информация о пользователе
@@ -36,10 +36,10 @@ public class UserInfo {
   private String email;
 
   /**
-   * Множество дат рождений детей пользователя
+   * Список дат рождений детей пользователя
    */
   @JsonProperty("birthDateChildren")
-  private Set<String> birthDateChildren;
+  private List<String> birthDateChildren;
 
   /**
    * Дата рождения пользователя
@@ -51,7 +51,7 @@ public class UserInfo {
    * Множество названий ролей пользователя
    */
   @JsonProperty("nameRoleSet")
-  private Set<String> nameRoleSet;
+  private List<String> nameRoleSet;
 
   /**
    * Название города пользователя

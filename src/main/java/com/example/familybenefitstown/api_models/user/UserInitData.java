@@ -7,11 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Дополнительные данные для создания или обновления пользователя.
- * Содержат в себе множества кратких информаций о городах и полных критериях
+ * Содержат в себе список кратких информаций о городах
  */
 @Data
 @Builder
@@ -20,8 +20,8 @@ import java.util.Set;
 public class UserInitData {
 
   /**
-   * Множество кратких информаций о городах
+   * Список кратких информаций о городах
    */
   @JsonProperty("shortCitySet")
-  private Set<ObjectShortInfo> shortCitySet;
+  private List<ObjectShortInfo> shortCitySet;
 }
