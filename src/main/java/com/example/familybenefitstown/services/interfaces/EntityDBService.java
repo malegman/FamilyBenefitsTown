@@ -1,6 +1,6 @@
 package com.example.familybenefitstown.services.interfaces;
 
-import com.example.familybenefitstown.dto.entity.ObjectEntity;
+import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Set;
