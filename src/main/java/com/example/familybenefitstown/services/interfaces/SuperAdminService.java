@@ -4,7 +4,6 @@ import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
-import com.example.familybenefitstown.exceptions.UserRoleException;
 
 /**
  * Интерфейс сервиса, управляющего объектом "супер-администратор"
@@ -29,18 +28,18 @@ public interface SuperAdminService {
   /**
    * Добавляет роль "ROLE_ADMIN" пользователю
    * @param idUser ID пользователя
-   * @throws NotFoundException если пользователь с данным ID не найден
-   * @throws UserRoleException если пользователь имеет роль "ROLE_ADMIN" или не имеет роль "ROLE_USER"
+   * @throws NotFoundException если пользователь с данным ID и ролью "ROLE_USER" не найден
+   * @throws AlreadyExistsException если пользователь имеет роль "ROLE_ADMIN"
    */
-  void fromUser(String idUser) throws NotFoundException, UserRoleException;
+  void fromUser(String idUser) throws NotFoundException, AlreadyExistsException;
 
   /**
    * Добавляет роль "ROLE_USER" администратору
    * @param idAdmin ID администратора
-   * @throws NotFoundException если администратор с данным ID не найден
-   * @throws UserRoleException если пользователь имеет роль "ROLE_USER" или не имеет роль "ROLE_ADMIN"
+   * @throws NotFoundException если пользователь с данным ID и ролью "ROLE_ADMIN" не найден
+   * @throws AlreadyExistsException если пользователь имеет роль "ROLE_USER"
    */
-  void toUser(String idAdmin) throws NotFoundException, UserRoleException;
+  void toUser(String idAdmin) throws NotFoundException, AlreadyExistsException;
 
   /**
    * Передает роль "ROLE_SUPER_ADMIN" указанному администратору, удаляя данную роль у текущего администратора
