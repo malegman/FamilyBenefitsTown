@@ -1,5 +1,6 @@
-package com.example.familybenefitstown.dto.entity;
+package com.example.familybenefitstown.dto.entities.strong;
 
+import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import lombok.*;
 import org.springframework.lang.NonNull;
 
@@ -36,12 +37,4 @@ public class ChildEntity extends ObjectEntity {
   @NonNull
   @Column(name = "date_birth")
   private LocalDate dateBirth;
-
-  /**
-   * Конструктор для создания модели по дате рождения
-   * @param dateBirth дата рождения ребенка
-   */
-  public ChildEntity(@NonNull LocalDate dateBirth) {
-    this.dateBirth = dateBirth;
-  }
 }
