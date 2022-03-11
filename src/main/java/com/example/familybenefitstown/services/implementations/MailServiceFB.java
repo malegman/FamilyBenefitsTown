@@ -1,5 +1,6 @@
 package com.example.familybenefitstown.services.implementations;
 
+import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.resources.RMail;
 import com.example.familybenefitstown.services.interfaces.MailService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Реализация сервиса для отправки сообщений на электронную почту
@@ -21,6 +23,8 @@ public class MailServiceFB implements MailService {
    * Почтовый сервис
    */
   private static final JavaMailSenderImpl mailSender;
+
+  public static final Pattern PATTERN_EMAIL = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$");
 
   // инициализация и настройка почтового сервиса
   static {
@@ -36,6 +40,20 @@ public class MailServiceFB implements MailService {
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.starttls.enable", "true");
     props.put("mail.debug", "true");
+  }
+
+  /**
+   * Проверяет корректность email
+   * @param email проверяемый email
+   * @throws InvalidEmailException если указанный "email" не является email
+   */
+  @Override
+  public void checkEmailElseThrow(String email) throws InvalidEmailException {
+
+    if (!PATTERN_EMAIL.matcher(email).matches()) {
+      throw new InvalidEmailException(String.format(
+          "Input value \"%s\" is not an email", email));
+    }
   }
 
   /**

@@ -1,11 +1,19 @@
 package com.example.familybenefitstown.services.interfaces;
 
+import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import org.springframework.mail.MailException;
 
 /**
- * Сервис для отправки сообщений на электронную почту
+ * Интерфейс сервиса для отправки сообщений на электронную почту
  */
 public interface MailService {
+
+  /**
+   * Проверяет корректность email
+   * @param email проверяемый email
+   * @throws InvalidEmailException если указанный "email" не является email
+   */
+  void checkEmailElseThrow(String email) throws InvalidEmailException;
 
   /**
    * Отправляет сообщение от имени сервиса пользователю по адресу с темой и текстом
