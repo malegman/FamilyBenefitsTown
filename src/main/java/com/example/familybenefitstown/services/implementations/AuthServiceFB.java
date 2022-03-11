@@ -1,14 +1,15 @@
 package com.example.familybenefitstown.services.implementations;
 
 import com.example.familybenefitstown.api_models.auth.LoginResponse;
-import com.example.familybenefitstown.dto.entity.RoleEntity;
-import com.example.familybenefitstown.dto.entity.UserEntity;
-import com.example.familybenefitstown.dto.repository.UserRepository;
+import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
+import com.example.familybenefitstown.dto.entities.strong.UserEntity;
+import com.example.familybenefitstown.dto.repositories.strong.UserRepository;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.services.interfaces.AuthService;
 import com.example.familybenefitstown.services.interfaces.MailService;
+import com.example.familybenefitstown.services.interfaces.UsersRolesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,11 @@ public class AuthServiceFB implements AuthService {
   private final UserRepository userRepository;
 
   /**
+   * Интерфейс сервиса, управляющего связью пользователей и ролей
+   */
+  private final UsersRolesService usersRolesService;
+
+  /**
    * Сервис для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
    */
   private final TokenCodeService tokenCodeService;
@@ -44,16 +50,19 @@ public class AuthServiceFB implements AuthService {
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
+   * @param usersRolesService интерфейс сервиса, управляющего связью пользователей и ролей
    * @param tokenCodeService интерфейс сервиса для работы с токеном доступа (в формате jwt) и кодом для входа
    * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
    * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public AuthServiceFB(UserRepository userRepository,
+                       UsersRolesService usersRolesService,
                        TokenCodeService tokenCodeService,
                        DBIntegrityService dbIntegrityService,
                        MailService mailService) {
     this.userRepository = userRepository;
+    this.usersRolesService = usersRolesService;
     this.tokenCodeService = tokenCodeService;
     this.dbIntegrityService = dbIntegrityService;
     this.mailService = mailService;
@@ -104,7 +113,7 @@ public class AuthServiceFB implements AuthService {
         .builder()
         .idUser(idUser)
         .nameUser(userEntityFromRequest.getName())
-        .nameRoleUserSet(userEntityFromRequest.getRoleEntitySet()
+        .nameRoleUserSet(usersRolesService.getRolesByUser(userEntityFromRequest)
                              .stream()
                              .map(RoleEntity::getName)
                              .collect(Collectors.toSet()))
