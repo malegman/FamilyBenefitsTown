@@ -1,6 +1,6 @@
-package com.example.familybenefitstown.dto.repository;
+package com.example.familybenefitstown.dto.repositories.strong;
 
-import com.example.familybenefitstown.dto.entity.ChildEntity;
+import com.example.familybenefitstown.dto.entities.strong.ChildEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -17,11 +17,4 @@ public interface ChildRepository extends JpaRepository<ChildEntity, String> {
    * @return модель ребенка или {@code empty}, если ребенок не найден
    */
   Optional<ChildEntity> findByDateBirth(LocalDate dateBirth);
-
-  /**
-   * Возвращает ребенка по дате рождения
-   * @param dateBirth дата рождения
-   * @return модель ребенка
-   */
-  ChildEntity getByDateBirth(LocalDate dateBirth);
 }
