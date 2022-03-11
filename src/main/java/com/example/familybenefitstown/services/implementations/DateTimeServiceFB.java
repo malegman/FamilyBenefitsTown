@@ -10,8 +10,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Реализация сервиса, который предоставляет методы для работы с датой и временем
@@ -53,6 +54,24 @@ public class DateTimeServiceFB implements DateTimeService {
   }
 
   /**
+   * Преобразует строки формата "dd.mm.yyyy" в даты
+   *
+   * @param userBirthList список дат в строковом виде
+   * @return преобразованная строка в формат даты
+   * @throws DateFormatException если одна из полученных строк не соответствует формату "dd.mm.yyyy"
+   */
+  @Override
+  public List<LocalDate> strToDate(List<String> userBirthList) throws DateFormatException {
+
+    List<LocalDate> localDateList = new ArrayList<>(userBirthList.size());
+    for (String userBirth : userBirthList) {
+      localDateList.add(strToDate(userBirth));
+    }
+
+    return localDateList;
+  }
+
+  /**
    * Проверяет дату на предшествие текущей дате
    * @param dateCheck проверяемая дата
    * @throws DateTimeException если проверяемая дата позже текущей даты
@@ -69,13 +88,13 @@ public class DateTimeServiceFB implements DateTimeService {
 
   /**
    * Проверяет множество дат на предшествие текущей дате
-   * @param dateSet множество проверяемых дат
+   * @param dateList множество проверяемых дат
    * @throws DateTimeException если проверяемая дата позже текущей даты
    */
   @Override
-  public void checkDateBeforeNow(Set<LocalDate> dateSet) throws DateTimeException {
+  public void checkDateBeforeNow(List<LocalDate> dateList) throws DateTimeException {
 
-    for (LocalDate date : dateSet) {
+    for (LocalDate date : dateList) {
       checkDateBeforeNow(date);
     }
   }
@@ -107,20 +126,6 @@ public class DateTimeServiceFB implements DateTimeService {
     if (dateBirth.plusYears(LocalDate.now().getYear() - dateBirth.getYear()).isAfter(dateCheck)) {
       throw new DateTimeException(String.format(
           "The day of birthday of date \"%s\" was after check date \"%s\"", dateBirth, dateCheck));
-    }
-  }
-
-  /**
-   * Проверяет, был ли дни рождения после проверяемой даты
-   * @param dateBirthSet множество дат рождения
-   * @param dateCheck проверяемая дата
-   * @throws DateTimeException если один из дней рождения был после проверяемой даты
-   */
-  @Override
-  public void checkBirthdayBefore(Set<LocalDate> dateBirthSet, LocalDate dateCheck) throws DateTimeException {
-
-    for (LocalDate dateBase : dateBirthSet) {
-      checkBirthdayBefore(dateBase, dateCheck);
     }
   }
 }

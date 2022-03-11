@@ -5,7 +5,7 @@ import com.example.familybenefitstown.exceptions.DateTimeException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Интерфейс сервиса, который предоставляет методы для работы с датой и временем
@@ -28,6 +28,14 @@ public interface DateTimeService {
   LocalDate strToDate(String userBirth) throws DateFormatException;
 
   /**
+   * Преобразует строки формата "dd.mm.yyyy" в даты
+   * @param userBirthList список дат в строковом виде
+   * @return преобразованная строка в формат даты
+   * @throws DateFormatException если одна из полученных строк не соответствует формату "dd.mm.yyyy"
+   */
+  List<LocalDate> strToDate(List<String> userBirthList) throws DateFormatException;
+
+  /**
    * Проверяет дату на предшествие текущей дате
    * @param dateCheck проверяемая дата
    * @throws DateTimeException если проверяемая дата позже текущей даты
@@ -35,11 +43,11 @@ public interface DateTimeService {
   void checkDateBeforeNow(LocalDate dateCheck) throws DateTimeException;
 
   /**
-   * Проверяет множество дат на предшествие текущей дате
-   * @param dateSet множество проверяемых дат
+   * Проверяет список дат на предшествие текущей дате
+   * @param dateList множество проверяемых дат
    * @throws DateTimeException если проверяемая дата позже текущей даты
    */
-  void checkDateBeforeNow(Set<LocalDate> dateSet) throws DateTimeException;
+  void checkDateBeforeNow(List<LocalDate> dateList) throws DateTimeException;
 
   /**
    * Проверяет текущее время на предшествие проверяемому времени
@@ -55,13 +63,5 @@ public interface DateTimeService {
    * @throws DateTimeException если день рождения был после проверяемой даты
    */
   void checkBirthdayBefore(LocalDate dateBirth, LocalDate dateCheck) throws DateTimeException;
-
-  /**
-   * Проверяет, был ли дни рождения после проверяемой даты
-   * @param dateBirthSet множество дат рождения
-   * @param dateCheck проверяемая дата
-   * @throws DateTimeException если один из дней рождения был после проверяемой даты
-   */
-  void checkBirthdayBefore(Set<LocalDate> dateBirthSet, LocalDate dateCheck) throws DateTimeException;
 }
 
