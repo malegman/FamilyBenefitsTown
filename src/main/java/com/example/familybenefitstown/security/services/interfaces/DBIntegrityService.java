@@ -1,6 +1,6 @@
 package com.example.familybenefitstown.security.services.interfaces;
 
-import com.example.familybenefitstown.dto.entity.ObjectEntity;
+import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 
