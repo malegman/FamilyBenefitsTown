@@ -4,7 +4,6 @@ import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
-import com.example.familybenefitstown.exceptions.UserRoleException;
 import com.example.familybenefitstown.services.interfaces.SuperAdminService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,12 +116,12 @@ public class SuperAdminController {
       return ResponseEntity.status(HttpStatus.CREATED).build();
 
     } catch (NotFoundException e) {
-      // Не найден пользователь
+      // Не найден пользователь с ролью "ROLE_USER"
       log.warn("{} POST \"/sa/from-user/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (UserRoleException e) {
-      // Пользователь имеет роль "ROLE_ADMIN" или не имеет роль "ROLE_USER"
+    } catch (AlreadyExistsException e) {
+      // Пользователь имеет роль "ROLE_ADMIN"
       log.warn("{} POST \"/sa/from-user/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -148,12 +147,12 @@ public class SuperAdminController {
       return ResponseEntity.status(HttpStatus.CREATED).build();
 
     } catch (NotFoundException e) {
-      // Не найден администратор
+      // Не найден пользователь с ролью "ROLE_ADMIN"
       log.warn("{} POST \"/sa/to-user/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (UserRoleException e) {
-      // Пользователь имеет роль "ROLE_USER" или не имеет роль "ROLE_ADMIN"
+    } catch (AlreadyExistsException e) {
+      // Пользователь имеет роль "ROLE_USER"
       log.warn("{} POST \"/sa/to-user/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
