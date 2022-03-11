@@ -1,6 +1,6 @@
-package com.example.familybenefitstown.dto.repository;
+package com.example.familybenefitstown.dto.repositories.strong;
 
-import com.example.familybenefitstown.dto.entity.RefreshTokenEntity;
+import com.example.familybenefitstown.dto.entities.strong.RefreshTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

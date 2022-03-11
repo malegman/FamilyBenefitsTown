@@ -1,6 +1,6 @@
-package com.example.familybenefitstown.dto.repository;
+package com.example.familybenefitstown.dto.repositories.strong;
 
-import com.example.familybenefitstown.dto.entity.CityEntity;
+import com.example.familybenefitstown.dto.entities.strong.CityEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
