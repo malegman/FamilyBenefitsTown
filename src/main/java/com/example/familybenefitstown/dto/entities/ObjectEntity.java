@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.dto.entity;
+package com.example.familybenefitstown.dto.entities;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
