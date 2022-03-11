@@ -3,14 +3,15 @@ package com.example.familybenefitstown.services.implementations;
 import com.example.familybenefitstown.api_models.admin.AdminInfo;
 import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.converters.AdminDBConverter;
-import com.example.familybenefitstown.dto.entity.UserEntity;
-import com.example.familybenefitstown.dto.repository.UserRepository;
+import com.example.familybenefitstown.dto.entities.strong.UserEntity;
+import com.example.familybenefitstown.dto.repositories.strong.UserRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
-import com.example.familybenefitstown.security.services.interfaces.UserSecurityService;
 import com.example.familybenefitstown.services.interfaces.AdminService;
+import com.example.familybenefitstown.services.interfaces.MailService;
+import com.example.familybenefitstown.services.interfaces.UsersRolesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,27 +29,34 @@ public class AdminServiceFB implements AdminService {
   private final UserRepository userRepository;
 
   /**
+   * Интерфейс сервиса, управляющего связью пользователей и ролей
+   */
+  private final UsersRolesService usersRolesService;
+
+  /**
    * Интерфейс сервиса, отвечающего за целостность базы данных
    */
   private final DBIntegrityService dbIntegrityService;
   /**
-   * Интерфейс сервиса, отвечающего за данные пользователя
+   * Интерфейс сервиса для отправки сообщений на электронную почту
    */
-  private final UserSecurityService userSecurityService;
+  private final MailService mailService;
 
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
+   * @param usersRolesService интерфейс сервиса, управляющего связью пользователей и ролей
    * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
-   * @param userSecurityService интерфейс сервиса, отвечающего за данные пользователя
+   * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public AdminServiceFB(UserRepository userRepository,
-                        DBIntegrityService dbIntegrityService,
-                        UserSecurityService userSecurityService) {
+                        UsersRolesService usersRolesService, DBIntegrityService dbIntegrityService,
+                        MailService mailService) {
     this.userRepository = userRepository;
+    this.usersRolesService = usersRolesService;
     this.dbIntegrityService = dbIntegrityService;
-    this.userSecurityService = userSecurityService;
+    this.mailService = mailService;
   }
 
   /**
@@ -67,7 +75,7 @@ public class AdminServiceFB implements AdminService {
         .orElseThrow(() -> new NotFoundException(String.format(
             "Administrator with ID \"%s\" not found", idAdmin)));
 
-    return AdminDBConverter.toInfo(userEntityFromRequest);
+    return AdminDBConverter.toInfo(userEntityFromRequest, usersRolesService.getRolesByUser(userEntityFromRequest));
   }
 
   /**
@@ -82,8 +90,7 @@ public class AdminServiceFB implements AdminService {
   public void update(String idAdmin, AdminSave adminSave) throws NotFoundException, InvalidEmailException, AlreadyExistsException {
 
     // Проверка строки email на соответствие формату email
-    userSecurityService.checkEmailElseThrow(
-        adminSave.getEmail());
+    mailService.checkEmailElseThrow(adminSave.getEmail());
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = AdminDBConverter
