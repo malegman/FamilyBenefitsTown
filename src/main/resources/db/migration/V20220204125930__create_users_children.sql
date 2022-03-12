@@ -10,7 +10,7 @@ CREATE TABLE family_benefit_town.users_children (
     ON UPDATE CASCADE,
   CONSTRAINT users_children_fk_child FOREIGN KEY ("id_child")
     REFERENCES family_benefit_town.child("id")
-    ON DELETE RESTRICT
+    ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 

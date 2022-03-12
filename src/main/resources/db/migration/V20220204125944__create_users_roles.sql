@@ -10,7 +10,7 @@ CREATE TABLE family_benefit_town.users_roles (
     ON UPDATE CASCADE,
   CONSTRAINT users_roles_fk_role FOREIGN KEY ("id_role")
     REFERENCES family_benefit_town.role("id")
-    ON DELETE RESTRICT
+    ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
