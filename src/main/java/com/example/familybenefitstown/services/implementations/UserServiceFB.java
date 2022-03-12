@@ -159,7 +159,9 @@ public class UserServiceFB implements UserService {
     String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
     UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
 
-    return UserDBConverter.toInfo(userEntityFromRequest, usersRolesService.getRolesByUser(userEntityFromRequest));
+    return UserDBConverter.toInfo(userEntityFromRequest,
+                                  usersChildrenService.getChildrenByUser(userEntityFromRequest),
+                                  usersRolesService.getRolesByUser(userEntityFromRequest));
   }
 
   /**

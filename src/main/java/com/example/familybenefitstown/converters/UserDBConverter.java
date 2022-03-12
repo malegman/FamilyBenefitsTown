@@ -2,10 +2,13 @@ package com.example.familybenefitstown.converters;
 
 import com.example.familybenefitstown.api_models.user.UserInfo;
 import com.example.familybenefitstown.api_models.user.UserSave;
-import com.example.familybenefitstown.dto.entity.CityEntity;
-import com.example.familybenefitstown.dto.entity.RoleEntity;
-import com.example.familybenefitstown.dto.entity.UserEntity;
+import com.example.familybenefitstown.dto.entities.strong.ChildEntity;
+import com.example.familybenefitstown.dto.entities.strong.CityEntity;
+import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
+import com.example.familybenefitstown.dto.entities.strong.UserEntity;
+import com.example.familybenefitstown.resources.R;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,7 +45,7 @@ public class UserDBConverter {
    * @param userEntity модель таблицы "user"
    * @return информация о пользователе
    */
-  static public UserInfo toInfo(UserEntity userEntity) {
+  static public UserInfo toInfo(UserEntity userEntity, List<ChildEntity> birthDateChildren, List<RoleEntity> roleEntityList) {
 
     if (userEntity == null || userEntity.getCityEntity() == null) {
       return new UserInfo();
@@ -53,11 +56,14 @@ public class UserDBConverter {
         .id(userEntity.getId())
         .name(userEntity.getName())
         .email(userEntity.getEmail())
-        .nameRoleSet(userEntity
-                         .getRoleEntitySet()
+        .birthDateChildren(birthDateChildren
+                               .stream()
+                               .map(childEntity -> R.SIMPLE_DATE_FORMAT.format(childEntity.getDateBirth()))
+                               .collect(Collectors.toList()))
+        .nameRoleSet(roleEntityList
                          .stream()
                          .map(RoleEntity::getName)
-                         .collect(Collectors.toSet()))
+                         .collect(Collectors.toList()))
         .nameCity(userEntity.getCityEntity().getName())
         .build();
   }
