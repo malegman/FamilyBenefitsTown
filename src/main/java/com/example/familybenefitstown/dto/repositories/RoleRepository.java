@@ -1,6 +1,6 @@
-package com.example.familybenefitstown.dto.repositories.strong;
+package com.example.familybenefitstown.dto.repositories;
 
-import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
+import com.example.familybenefitstown.dto.entities.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

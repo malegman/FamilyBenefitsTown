@@ -1,11 +1,11 @@
 package com.example.familybenefitstown.security.services.implementations;
 
-import com.example.familybenefitstown.dto.entities.strong.LoginCodeEntity;
-import com.example.familybenefitstown.dto.entities.strong.RefreshTokenEntity;
-import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
-import com.example.familybenefitstown.dto.repositories.strong.LoginCodeRepository;
-import com.example.familybenefitstown.dto.repositories.strong.RefreshTokenRepository;
-import com.example.familybenefitstown.dto.repositories.strong.RoleRepository;
+import com.example.familybenefitstown.dto.entities.LoginCodeEntity;
+import com.example.familybenefitstown.dto.entities.RefreshTokenEntity;
+import com.example.familybenefitstown.dto.entities.RoleEntity;
+import com.example.familybenefitstown.dto.repositories.LoginCodeRepository;
+import com.example.familybenefitstown.dto.repositories.RefreshTokenRepository;
+import com.example.familybenefitstown.dto.repositories.RoleRepository;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;

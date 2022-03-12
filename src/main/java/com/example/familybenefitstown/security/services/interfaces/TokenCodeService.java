@@ -1,6 +1,6 @@
 package com.example.familybenefitstown.security.services.interfaces;
 
-import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
+import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.web.auth.AuthTokens;
