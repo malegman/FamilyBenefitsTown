@@ -5,10 +5,12 @@ import com.example.familybenefitstown.api_models.user.UserInitData;
 import com.example.familybenefitstown.api_models.user.UserSave;
 import com.example.familybenefitstown.converters.CityDBConverter;
 import com.example.familybenefitstown.converters.UserDBConverter;
-import com.example.familybenefitstown.dto.entities.strong.CityEntity;
-import com.example.familybenefitstown.dto.entities.strong.UserEntity;
-import com.example.familybenefitstown.dto.repositories.strong.CityRepository;
-import com.example.familybenefitstown.dto.repositories.strong.UserRepository;
+import com.example.familybenefitstown.dto.entities.ChildEntity;
+import com.example.familybenefitstown.dto.entities.CityEntity;
+import com.example.familybenefitstown.dto.entities.UserEntity;
+import com.example.familybenefitstown.dto.repositories.ChildRepository;
+import com.example.familybenefitstown.dto.repositories.CityRepository;
+import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.*;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
@@ -21,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,15 +39,10 @@ public class UserServiceFB implements UserService {
    * Репозиторий, работающий с моделью таблицы "user"
    */
   private final UserRepository userRepository;
-
   /**
-   * Интерфейс сервиса, управляющего связью пользователей и ролей
+   * Репозиторий, работающий с моделью таблицы "child"
    */
-  private final UsersRolesService usersRolesService;
-  /**
-   * Интерфейс сервиса, управляющего связью пользователей и детей
-   */
-  private final UsersChildrenService usersChildrenService;
+  private final ChildRepository childRepository;
 
   /**
    * Интерфейс сервиса модели таблицы "city", целостность которой зависит от связанных таблиц
@@ -71,8 +70,7 @@ public class UserServiceFB implements UserService {
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
-   * @param usersRolesService интерфейс сервиса, управляющего связью пользователей и ролей
-   * @param usersChildrenService интерфейс сервиса, управляющего связью пользователей и детей
+   * @param childRepository репозиторий, работающий с моделью таблицы "child"
    * @param cityDBService интерфейс сервиса модели таблицы "city", целостность которой зависит от связанных таблиц
    * @param dateTimeService интерфейс сервиса, который предоставляет методы для работы с датой и временем
    * @param tokenCodeService интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
@@ -81,16 +79,14 @@ public class UserServiceFB implements UserService {
    */
   @Autowired
   public UserServiceFB(UserRepository userRepository,
-                       UsersRolesService usersRolesService,
-                       UsersChildrenService usersChildrenService,
+                       ChildRepository childRepository,
                        EntityDBService<CityEntity, CityRepository> cityDBService,
                        DateTimeService dateTimeService,
                        TokenCodeService tokenCodeService,
                        DBIntegrityService dbIntegrityService,
                        MailService mailService) {
     this.userRepository = userRepository;
-    this.usersRolesService = usersRolesService;
-    this.usersChildrenService = usersChildrenService;
+    this.childRepository = childRepository;
     this.tokenCodeService = tokenCodeService;
     this.cityDBService = cityDBService;
     this.dateTimeService = dateTimeService;
@@ -139,11 +135,11 @@ public class UserServiceFB implements UserService {
     dateTimeService.checkDateBeforeNow(childBirthList);
 
     userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
-    usersRolesService.addUserRole(userEntityFromSave, RDB.ROLE_USER);
+    userEntityFromSave.setRoleEntityList(Collections.singletonList(RDB.ROLE_USER));
+    userEntityFromSave.setChildEntityList(childEntityFromBirth(childBirthList));
 
-    userRepository.saveAndFlush(userEntityFromSave);
+    userRepository.save(userEntityFromSave);
     log.info("DB. User with email \"{}\" created.", userSave.getEmail());
-    childBirthList.forEach(childBirth -> usersChildrenService.addUserChild(userEntityFromSave, childBirth));
   }
 
   /**
@@ -159,9 +155,7 @@ public class UserServiceFB implements UserService {
     String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
     UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
 
-    return UserDBConverter.toInfo(userEntityFromRequest,
-                                  usersChildrenService.getChildrenByUser(userEntityFromRequest),
-                                  usersRolesService.getRolesByUser(userEntityFromRequest));
+    return UserDBConverter.toInfo(userEntityFromRequest);
   }
 
   /**
@@ -212,10 +206,10 @@ public class UserServiceFB implements UserService {
 
     userEntityFromDB.setEmail(userEntityFromSave.getEmail());
     userEntityFromDB.setName(userEntityFromSave.getName());
+    userEntityFromDB.setChildEntityList(childEntityFromBirth(childBirthList));
 
-    userRepository.saveAndFlush(userEntityFromDB);
+    userRepository.save(userEntityFromDB);
     log.info("DB. User with ID \"{}\" updated.", idUser);
-    childBirthList.forEach(childBirth -> usersChildrenService.addUserChild(userEntityFromDB, childBirth));
   }
 
   /**
@@ -231,9 +225,9 @@ public class UserServiceFB implements UserService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
 
     // Если есть роль "ROLE_ADMIN", удаление роли "ROLE_USER", иначе удаление пользователя и его токена восстановления
-    if (usersRolesService.hasUserRole(prepareIdUser, RDB.ID_ROLE_ADMIN)) {
-      usersRolesService.deleteUserRole(prepareIdUser, RDB.ID_ROLE_USER);
-      userRepository.saveAndFlush(userEntityFromRequest);
+    if (userEntityFromRequest.hasRole(RDB.ROLE_ADMIN)) {
+      userEntityFromRequest.deleteRole(RDB.ROLE_USER);
+      userRepository.save(userEntityFromRequest);
       log.info("DB. User with ID \"{}\" updated. Removed role \"{}\"", idUser, RDB.NAME_ROLE_USER);
     } else {
       userRepository.deleteById(prepareIdUser);
@@ -261,6 +255,18 @@ public class UserServiceFB implements UserService {
   }
 
   /**
+   * Проверяет существование пользователя по email
+   * @param email почта пользователя
+   * @return {@code true}, если пользователь существует
+   */
+  @Override
+  public boolean existsByEmail(String email) {
+
+    String prepareEmail = dbIntegrityService.preparePostgreSQLString(email);
+    return userRepository.existsByEmail(prepareEmail);
+  }
+
+  /**
    * Возвращает модель пользователя по его ID
    * @param prepareId подготовленное для бд ID пользователя
    * @return модель пользователя
@@ -273,15 +279,15 @@ public class UserServiceFB implements UserService {
             "User with ID \"%s\" not found", prepareId)));
   }
 
-  /**
-   * Проверяет существование пользователя по email
-   * @param email почта пользователя
-   * @return {@code true}, если пользователь существует
-   */
-  @Override
-  public boolean existsByEmail(String email) {
+  private List<ChildEntity> childEntityFromBirth(List<LocalDate> childBirthList) {
 
-    String prepareEmail = dbIntegrityService.preparePostgreSQLString(email);
-    return userRepository.existsByEmail(prepareEmail);
+    List<ChildEntity> childEntityList = new ArrayList<>(childBirthList.size());
+
+    for (LocalDate childBirth : childBirthList) {
+      childEntityList.add(childRepository.findByDateBirth(childBirth).orElse(
+          new ChildEntity(RandomValue.randomString(R.ID_LENGTH), childBirth, Collections.emptyList())));
+    }
+
+    return childEntityList;
   }
 }
