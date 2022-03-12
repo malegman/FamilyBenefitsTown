@@ -1,13 +1,10 @@
-package com.example.familybenefitstown.dto.entities.strong;
+package com.example.familybenefitstown.dto.entities;
 
-import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import lombok.*;
 import org.springframework.lang.NonNull;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Модель записи таблицы "role"
@@ -36,5 +33,12 @@ public class RoleEntity extends ObjectEntity {
   @NonNull
   @Column(name = "name")
   private String name;
+
+  /**
+   * Список пользователей с данной ролью
+   */
+  @ManyToMany(mappedBy = "roleEntityList")
+  @ToString.Exclude
+  private List<UserEntity> userEntityList;
 }
 

@@ -1,14 +1,11 @@
-package com.example.familybenefitstown.dto.entities.strong;
+package com.example.familybenefitstown.dto.entities;
 
-import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import lombok.*;
 import org.springframework.lang.NonNull;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Модель записи таблицы "child"
@@ -37,4 +34,11 @@ public class ChildEntity extends ObjectEntity {
   @NonNull
   @Column(name = "date_birth")
   private LocalDate dateBirth;
+
+  /**
+   * Список пользователей с данным ребенком
+   */
+  @ManyToMany(mappedBy = "childEntityList")
+  @ToString.Exclude
+  private List<UserEntity> userEntityList;
 }
