@@ -86,7 +86,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
 
     cityEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
 
-    cityRepository.saveAndFlush(cityEntityFromSave);
+    cityRepository.save(cityEntityFromSave);
     log.info("DB. City with name \"{}\" created.", citySave.getName());
   }
 
@@ -134,7 +134,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
 
     cityEntityFromSave.setId(prepareIdCity);
 
-    cityRepository.saveAndFlush(cityEntityFromSave);
+    cityRepository.save(cityEntityFromSave);
     log.info("DB. City with ID \"{}\" updated.", idCity);
   }
 

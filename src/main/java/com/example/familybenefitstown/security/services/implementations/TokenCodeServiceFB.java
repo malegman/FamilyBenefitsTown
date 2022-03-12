@@ -137,7 +137,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
     String refreshToken = RandomValue.randomString(R.REFRESH_LENGTH);
 
     // Сохранение токена восстановления
-    refreshTokenRepository.saveAndFlush(RefreshTokenEntity
+    refreshTokenRepository.save(RefreshTokenEntity
                                             .builder()
                                             .idUser(idUser)
                                             .token(refreshToken)
@@ -181,7 +181,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
     int loginCode = RandomValue.randomInteger(R.LOGIN_CODE_LENGTH);
 
     // Сохранение кода в бд
-    loginCodeRepository.saveAndFlush(LoginCodeEntity.builder()
+    loginCodeRepository.save(LoginCodeEntity.builder()
                                          .idUser(idUser)
                                          .code(loginCode)
                                          .dateExpiration(dateTimeService.getExpiration(R.LOGIN_EXPIRATION_SEC))
