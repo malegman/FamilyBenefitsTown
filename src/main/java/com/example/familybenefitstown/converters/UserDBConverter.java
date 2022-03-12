@@ -2,13 +2,11 @@ package com.example.familybenefitstown.converters;
 
 import com.example.familybenefitstown.api_models.user.UserInfo;
 import com.example.familybenefitstown.api_models.user.UserSave;
-import com.example.familybenefitstown.dto.entities.strong.ChildEntity;
-import com.example.familybenefitstown.dto.entities.strong.CityEntity;
-import com.example.familybenefitstown.dto.entities.strong.RoleEntity;
-import com.example.familybenefitstown.dto.entities.strong.UserEntity;
+import com.example.familybenefitstown.dto.entities.CityEntity;
+import com.example.familybenefitstown.dto.entities.RoleEntity;
+import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.resources.R;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,7 +43,7 @@ public class UserDBConverter {
    * @param userEntity модель таблицы "user"
    * @return информация о пользователе
    */
-  static public UserInfo toInfo(UserEntity userEntity, List<ChildEntity> birthDateChildren, List<RoleEntity> roleEntityList) {
+  static public UserInfo toInfo(UserEntity userEntity) {
 
     if (userEntity == null || userEntity.getCityEntity() == null) {
       return new UserInfo();
@@ -56,11 +54,11 @@ public class UserDBConverter {
         .id(userEntity.getId())
         .name(userEntity.getName())
         .email(userEntity.getEmail())
-        .birthDateChildren(birthDateChildren
+        .birthDateChildren(userEntity.getChildEntityList()
                                .stream()
                                .map(childEntity -> R.SIMPLE_DATE_FORMAT.format(childEntity.getDateBirth()))
                                .collect(Collectors.toList()))
-        .nameRoleSet(roleEntityList
+        .nameRoleSet(userEntity.getRoleEntityList()
                          .stream()
                          .map(RoleEntity::getName)
                          .collect(Collectors.toList()))
