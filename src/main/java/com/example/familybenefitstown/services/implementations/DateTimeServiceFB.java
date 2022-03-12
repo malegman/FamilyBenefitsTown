@@ -2,28 +2,22 @@ package com.example.familybenefitstown.services.implementations;
 
 import com.example.familybenefitstown.exceptions.DateFormatException;
 import com.example.familybenefitstown.exceptions.DateTimeException;
+import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.services.interfaces.DateTimeService;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Реализация сервиса, который предоставляет методы для работы с датой и временем
  */
 @Service
 public class DateTimeServiceFB implements DateTimeService {
-
-  /**
-   * Формат даты для преобразования строки в дату и дату в строку
-   */
-  private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy", Locale.US);
 
   /**
    * Возвращает дату истечения срока жизни. Дата формируется из текущего времени и прибавленных секунд
@@ -46,7 +40,7 @@ public class DateTimeServiceFB implements DateTimeService {
   public LocalDate strToDate(String userBirth) throws DateFormatException {
 
     try {
-      return LocalDate.from((TemporalAccessor) SIMPLE_DATE_FORMAT.parse(userBirth));
+      return LocalDate.from((TemporalAccessor) R.SIMPLE_DATE_FORMAT.parse(userBirth));
     } catch (ParseException e) {
       throw new DateFormatException(String.format(
           "The string \"%s\" doesn't match the date format \"dd.mm.yyyy\"", userBirth));
