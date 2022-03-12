@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: 'org.postgresql.Driver'
+    url: 'jdbc:postgresql://localhost/dbforbenefits'
+    username: 'familyben'
+    password: 'familyben'
+  jpa:
+    properties:
+      hibernate:
+        dialect: 'org.hibernate.dialect.PostgreSQLDialect'
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: 'classpath:db/migration'
+    default-schema: 'family_benefit_town'
+    schemas: 'family_benefit_town'
+    create-schemas: true
+    out-of-order: true
