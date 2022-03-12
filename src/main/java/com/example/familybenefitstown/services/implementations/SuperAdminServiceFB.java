@@ -2,8 +2,9 @@ package com.example.familybenefitstown.services.implementations;
 
 import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.converters.AdminDBConverter;
-import com.example.familybenefitstown.dto.entities.strong.UserEntity;
-import com.example.familybenefitstown.dto.repositories.strong.UserRepository;
+import com.example.familybenefitstown.dto.entities.RoleEntity;
+import com.example.familybenefitstown.dto.entities.UserEntity;
+import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
@@ -14,7 +15,6 @@ import com.example.familybenefitstown.security.services.interfaces.DBIntegritySe
 import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.services.interfaces.MailService;
 import com.example.familybenefitstown.services.interfaces.SuperAdminService;
-import com.example.familybenefitstown.services.interfaces.UsersRolesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,11 +32,6 @@ public class SuperAdminServiceFB implements SuperAdminService {
   private final UserRepository userRepository;
 
   /**
-   * Интерфейс сервиса, управляющего связью пользователей и ролей
-   */
-  private final UsersRolesService usersRolesService;
-
-  /**
    * Интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
    */
   private final TokenCodeService tokenCodeService;
@@ -52,19 +47,16 @@ public class SuperAdminServiceFB implements SuperAdminService {
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
-   * @param usersRolesService интерфейс сервиса, управляющего связью пользователей и ролей
    * @param tokenCodeService интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
    * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
    * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public SuperAdminServiceFB(UserRepository userRepository,
-                             UsersRolesService usersRolesService,
                              TokenCodeService tokenCodeService,
                              DBIntegrityService dbIntegrityService,
                              MailService mailService) {
     this.userRepository = userRepository;
-    this.usersRolesService = usersRolesService;
     this.tokenCodeService = tokenCodeService;
     this.dbIntegrityService = dbIntegrityService;
     this.mailService = mailService;
@@ -91,9 +83,9 @@ public class SuperAdminServiceFB implements SuperAdminService {
         userRepository::existsByEmail, userEntityFromSave.getEmail());
 
     userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
-    usersRolesService.addUserRole(userEntityFromSave, RDB.ROLE_ADMIN);
+    userEntityFromSave.addRole(RDB.ROLE_ADMIN);
 
-    userRepository.saveAndFlush(userEntityFromSave);
+    userRepository.save(userEntityFromSave);
     log.info("DB. Administrator with email \"{}\" created.", adminSave.getEmail());
   }
 
@@ -110,12 +102,12 @@ public class SuperAdminServiceFB implements SuperAdminService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdAdmin, "Administrator");
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
-    checkHasRoleElseThrowNotFound(prepareIdAdmin, RDB.ID_ROLE_ADMIN);
+    checkHasRoleElseThrowNotFound(userEntityFromRequest, RDB.ROLE_ADMIN);
 
     // Если есть роль "ROLE_USER", удаление роли "ROLE_ADMIN", иначе удаление пользователя и его токена восстановления с кодом входа
-    if (usersRolesService.hasUserRole(prepareIdAdmin, RDB.ID_ROLE_USER)) {
-      usersRolesService.deleteUserRole(prepareIdAdmin, RDB.ID_ROLE_ADMIN);
-      userRepository.saveAndFlush(userEntityFromRequest);
+    if (userEntityFromRequest.hasRole(RDB.ROLE_USER)) {
+      userEntityFromRequest.deleteRole(RDB.ROLE_ADMIN);
+      userRepository.save(userEntityFromRequest);
       log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\".", idAdmin, RDB.NAME_ROLE_ADMIN);
     } else {
       userRepository.deleteById(prepareIdAdmin);
@@ -138,13 +130,13 @@ public class SuperAdminServiceFB implements SuperAdminService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdUser, "User");
 
     // Проверка наличия роли "ROLE_USER" у пользователя
-    checkHasRoleElseThrowNotFound(prepareIdUser, RDB.ID_ROLE_USER);
+    checkHasRoleElseThrowNotFound(userEntityFromRequest, RDB.ROLE_USER);
     // Проверка отсутствия роли "ROLE_ADMIN" у пользователя
-    checkNotHasRoleElseThrowUserRole(prepareIdUser, RDB.ID_ROLE_ADMIN);
+    checkNotHasRoleElseThrowUserRole(userEntityFromRequest, RDB.ROLE_ADMIN);
 
-    usersRolesService.addUserRole(userEntityFromRequest, RDB.ROLE_ADMIN);
+    userEntityFromRequest.addRole(RDB.ROLE_ADMIN);
 
-    userRepository.saveAndFlush(userEntityFromRequest);
+    userRepository.save(userEntityFromRequest);
     log.info("DB. User with ID \"{}\" updated. Added role \"{}\"", idUser, RDB.NAME_ROLE_ADMIN);
   }
 
@@ -162,13 +154,13 @@ public class SuperAdminServiceFB implements SuperAdminService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdAdmin, "Administrator");
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
-    checkHasRoleElseThrowNotFound(prepareIdAdmin, RDB.ID_ROLE_ADMIN);
+    checkHasRoleElseThrowNotFound(userEntityFromRequest, RDB.ROLE_ADMIN);
     // Проверка отсутствия роли "ROLE_USER" у пользователя
-    checkNotHasRoleElseThrowUserRole(prepareIdAdmin, RDB.ID_ROLE_USER);
+    checkNotHasRoleElseThrowUserRole(userEntityFromRequest, RDB.ROLE_USER);
 
-    usersRolesService.addUserRole(userEntityFromRequest, RDB.ROLE_USER);
+    userEntityFromRequest.addRole(RDB.ROLE_USER);
 
-    userRepository.saveAndFlush(userEntityFromRequest);
+    userRepository.save(userEntityFromRequest);
     log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, RDB.NAME_ROLE_USER);
   }
 
@@ -185,16 +177,16 @@ public class SuperAdminServiceFB implements SuperAdminService {
     UserEntity userEntityFromRequest = getUserEntity(prepareIdAdmin, "Administrator");
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
-    checkHasRoleElseThrowNotFound(prepareIdAdmin, RDB.ID_ROLE_ADMIN);
+    checkHasRoleElseThrowNotFound(userEntityFromRequest, RDB.ROLE_ADMIN);
 
     // Передача роли "ROLE_SUPER_ADMIN"
     UserEntity userEntitySuperAdmin = userRepository.getSuperAdmin();
-    usersRolesService.deleteUserRole(prepareIdAdmin, RDB.ID_ROLE_SUPER_ADMIN);
-    usersRolesService.addUserRole(userEntityFromRequest, RDB.ROLE_SUPER_ADMIN);
+    userEntitySuperAdmin.deleteRole(RDB.ROLE_SUPER_ADMIN);
+    userEntityFromRequest.addRole(RDB.ROLE_SUPER_ADMIN);
 
-    userRepository.saveAndFlush(userEntitySuperAdmin);
+    userRepository.save(userEntitySuperAdmin);
     log.info("DB. Administrator with ID \"{}\" updated. Removed role \"{}\"", idAdmin, RDB.ROLE_SUPER_ADMIN);
-    userRepository.saveAndFlush(userEntityFromRequest);
+    userRepository.save(userEntityFromRequest);
     log.info("DB. Administrator with ID \"{}\" updated. Added role \"{}\"", idAdmin, RDB.ROLE_SUPER_ADMIN);
   }
 
@@ -214,29 +206,29 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
   /**
    * Проверяет наличие у пользователя роли. В случае отсутствия, выбрасывается {@link NotFoundException}
-   * @param idUser ID пользователя, у которого необходимо проверить наличие роли
-   * @param idRole ID проверяемой роли
+   * @param userEntity модель пользователя, у которого необходимо проверить наличие роли
+   * @param roleEntity модель проверяемой роли
    * @throws NotFoundException если пользователь с данной ролью не найден
    */
-  private void checkHasRoleElseThrowNotFound(String idUser, String idRole) throws NotFoundException {
+  private void checkHasRoleElseThrowNotFound(UserEntity userEntity, RoleEntity roleEntity) throws NotFoundException {
 
-    if (!usersRolesService.hasUserRole(idUser, idRole)) {
+    if (!userEntity.hasRole(roleEntity)) {
       throw new NotFoundException(String.format(
-          "User with ID \"%s\" doesn't have role with ID \"%s\"", idUser, idRole));
+          "User with ID \"%s\" doesn't have role with ID \"%s\"", userEntity.getId(), roleEntity.getId()));
     }
   }
 
   /**
    * Проверяет отсутствие у пользователя роли. В случае наличия, выбрасывается {@link AlreadyExistsException}
-   * @param idUser ID пользователя, у которого необходимо проверить отсутствие роли
-   * @param idRole ID проверяемой роли
+   * @param userEntity модель пользователя, у которого необходимо проверить отсутствие роли
+   * @param roleEntity модель проверяемой роли
    * @throws AlreadyExistsException если пользователь имеет роль
    */
-  private void checkNotHasRoleElseThrowUserRole(String idUser, String idRole) throws AlreadyExistsException {
+  private void checkNotHasRoleElseThrowUserRole(UserEntity userEntity, RoleEntity roleEntity) throws AlreadyExistsException {
 
-    if (usersRolesService.hasUserRole(idUser, idRole)) {
+    if (userEntity.hasRole(roleEntity)) {
       throw new AlreadyExistsException(String.format(
-          "User with ID \"%s\" already has role with ID \"%s\"", idUser, idRole));
+          "User with ID \"%s\" already has role with ID \"%s\"", userEntity.getId(), roleEntity.getId()));
     }
   }
 }
