@@ -6,6 +6,8 @@ target/
 
 .idea/
 gen/
+logs/
+out/
 *.iws
 *.iml
 *.ipr
