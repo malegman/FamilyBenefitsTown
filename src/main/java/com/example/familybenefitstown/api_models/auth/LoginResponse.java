@@ -30,7 +30,7 @@ public class LoginResponse {
   private String nameUser;
 
   /**
-   * Множество названий ролей пользователя
+   * Список названий ролей пользователя
    */
   @JsonProperty("nameRoleUserList")
   private List<String> nameRoleUserList;

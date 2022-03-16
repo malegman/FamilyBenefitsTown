@@ -48,7 +48,7 @@ public class UserInfo {
   private String dateBirth;
 
   /**
-   * Множество названий ролей пользователя
+   * Список названий ролей пользователя
    */
   @JsonProperty("nameRoleList")
   private List<String> nameRoleList;
