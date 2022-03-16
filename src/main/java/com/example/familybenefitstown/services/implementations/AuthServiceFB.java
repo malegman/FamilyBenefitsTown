@@ -3,6 +3,7 @@ package com.example.familybenefitstown.services.implementations;
 import com.example.familybenefitstown.api_models.auth.LoginResponse;
 import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
+import com.example.familybenefitstown.dto.repositories.RoleRepository;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
@@ -28,6 +29,11 @@ public class AuthServiceFB implements AuthService {
   private final UserRepository userRepository;
 
   /**
+   * Репозиторий, работающий с моделью таблицы "role"
+   */
+  private final RoleRepository roleRepository;
+
+  /**
    * Сервис для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
    */
   private final TokenCodeService tokenCodeService;
@@ -44,16 +50,19 @@ public class AuthServiceFB implements AuthService {
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
+   * @param roleRepository репозиторий, работающий с моделью таблицы "role"
    * @param tokenCodeService интерфейс сервиса для работы с токеном доступа (в формате jwt) и кодом для входа
    * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
    * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public AuthServiceFB(UserRepository userRepository,
+                       RoleRepository roleRepository,
                        TokenCodeService tokenCodeService,
                        DBIntegrityService dbIntegrityService,
                        MailService mailService) {
     this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
     this.tokenCodeService = tokenCodeService;
     this.dbIntegrityService = dbIntegrityService;
     this.mailService = mailService;
@@ -86,13 +95,15 @@ public class AuthServiceFB implements AuthService {
    * @param email почта пользователя
    * @param loginCode код для входа пользователя
    * @return объект ответа на вход в систему
+   * @throws NotFoundException если пользователь с данным email не найден
    */
   @Override
-  public LoginResponse login(String email, int loginCode) {
+  public LoginResponse login(String email, int loginCode) throws NotFoundException {
 
     // Получение пользователя по его email, если пользователь существует
     String preparedEmail = dbIntegrityService.preparePostgreSQLString(email);
-    UserEntity userEntityFromRequest = userRepository.getByEmail(preparedEmail);
+    UserEntity userEntityFromRequest = userRepository.findByEmail(preparedEmail).orElseThrow(
+        () -> new NotFoundException(String.format("User with email \"%s\" not found", email)));
 
     String idUser = userEntityFromRequest.getId();
 
@@ -104,10 +115,10 @@ public class AuthServiceFB implements AuthService {
         .builder()
         .idUser(idUser)
         .nameUser(userEntityFromRequest.getName())
-        .nameRoleUserSet(userEntityFromRequest.getRoleEntityList()
+        .nameRoleUserList(roleRepository.findAllByIdUser(idUser)
                              .stream()
                              .map(RoleEntity::getName)
-                             .collect(Collectors.toSet()))
+                             .collect(Collectors.toList()))
         .build();
   }
 
