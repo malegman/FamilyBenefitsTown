@@ -50,8 +50,8 @@ public class UserInfo {
   /**
    * Множество названий ролей пользователя
    */
-  @JsonProperty("nameRoleSet")
-  private List<String> nameRoleSet;
+  @JsonProperty("nameRoleList")
+  private List<String> nameRoleList;
 
   /**
    * Название города пользователя

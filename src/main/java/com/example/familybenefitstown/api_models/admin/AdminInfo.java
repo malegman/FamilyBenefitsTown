@@ -38,6 +38,6 @@ public class AdminInfo {
   /**
    * Список названий ролей администратора
    */
-  @JsonProperty("nameRoleSet")
-  private List<String> nameRoleSet;
+  @JsonProperty("nameRoleList")
+  private List<String> nameRoleList;
 }

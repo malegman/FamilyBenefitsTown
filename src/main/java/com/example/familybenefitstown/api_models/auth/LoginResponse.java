@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Объект ответа на вход в систему
@@ -32,6 +32,6 @@ public class LoginResponse {
   /**
    * Множество названий ролей пользователя
    */
-  @JsonProperty("nameRoleUserSet")
-  private Set<String> nameRoleUserSet;
+  @JsonProperty("nameRoleUserList")
+  private List<String> nameRoleUserList;
 }
