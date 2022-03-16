@@ -307,8 +307,8 @@ public class UserRepositoryTest {
     userRepository.addChildToUser(ID_TEST_USER, testChild.getId());
     log.info("All test user's children (4)");
     AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(1);
-    log.info("Delete test child from test user (4)");
-    userRepository.deleteChildFromUser(ID_TEST_USER, testChild.getId());
+    log.info("Delete all children from test user (4)");
+    userRepository.deleteAllChildrenFromUser(ID_TEST_USER);
     log.info("All test user's children (4)");
     AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
 
@@ -350,7 +350,7 @@ public class UserRepositoryTest {
 
     // 2. Создание связи с существующим в бд городом.
 
-    CityEntity testCity = new CityEntity("id_testCity", "testCity");
+    CityEntity testCity = new CityEntity("id_testCity", "testCity", null);
     log.info("Save city (2)");
     cityRepository.save(testCity);
     testUser.setIdCity("id_testCity");
