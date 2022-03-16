@@ -12,12 +12,10 @@ import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.services.interfaces.CityService;
-import com.example.familybenefitstown.services.interfaces.EntityDBService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class CityServiceFB implements CityService, EntityDBService<CityEntity, CityRepository> {
+public class CityServiceFB implements CityService {
 
   /**
    * Репозиторий, работающий с моделью таблицы "city"
@@ -60,7 +58,7 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
   @Override
   public Set<ObjectShortInfo> readAllFilter(String nameCity) {
 
-    return findAllFull()
+    return cityRepository.findAll()
         .stream()
         .filter(cityEntity -> nameCity == null || cityEntity.getName().equals(nameCity))
         .map(CityDBConverter::toShortInfo)
@@ -101,9 +99,8 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
 
     // Получение города по его ID, если город существует
     String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
-    CityEntity cityEntityFromRequest = cityRepository.findById(prepareIdCity)
-        .orElseThrow(() -> new NotFoundException(String.format(
-            "City with ID \"%s\" not found", idCity)));
+    CityEntity cityEntityFromRequest = cityRepository.findById(prepareIdCity).orElseThrow(
+        () -> new NotFoundException(String.format("City with ID \"%s\" not found", idCity)));
 
     return CityDBConverter.toInfo(cityEntityFromRequest);
   }
@@ -154,35 +151,6 @@ public class CityServiceFB implements CityService, EntityDBService<CityEntity, C
 
     cityRepository.deleteById(prepareIdCity);
     log.info("DB. City with ID \"{}\" deleted.", idCity);
-  }
-
-  /**
-   * Возвращает репозиторий сервиса
-   * @return репозиторий сервиса
-   */
-  @Override
-  public CityRepository getRepository() {
-    return cityRepository;
-  }
-
-  /**
-   * Возвращает множество всех моделей таблицы "city"
-   * @return множество моделей таблиц
-   */
-  @Override
-  public Set<CityEntity> findAllFull() {
-
-    return new HashSet<>(cityRepository.findAll());
-  }
-
-  /**
-   * Возвращает множество моделей таблицы "city", в которых нет моделей пособий или учреждений
-   * @return множество моделей таблиц
-   */
-  @Override
-  public Set<CityEntity> findAllPartial() {
-
-    return new HashSet<>(cityRepository.findAll());
   }
 }
 
