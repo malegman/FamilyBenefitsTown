@@ -5,6 +5,7 @@ import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,9 +37,10 @@ public class AdminDBConverter {
   /**
    * Преобразует модель таблицы "user" в объект информации об администраторе
    * @param userEntity модель таблицы "user"
+   * @param roleEntityList список моделей таблицы "role", связанных с администратором
    * @return информация об администраторе
    */
-  static public AdminInfo toInfo(UserEntity userEntity) {
+  static public AdminInfo toInfo(UserEntity userEntity, List<RoleEntity> roleEntityList) {
 
     if (userEntity == null) {
       return new AdminInfo();
@@ -49,7 +51,7 @@ public class AdminDBConverter {
         .id(userEntity.getId())
         .name(userEntity.getName())
         .email(userEntity.getEmail())
-        .nameRoleSet(userEntity.getRoleEntityList()
+        .nameRoleList(roleEntityList
                          .stream()
                          .map(RoleEntity::getName)
                          .collect(Collectors.toList()))

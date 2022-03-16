@@ -2,11 +2,12 @@ package com.example.familybenefitstown.converters;
 
 import com.example.familybenefitstown.api_models.user.UserInfo;
 import com.example.familybenefitstown.api_models.user.UserSave;
-import com.example.familybenefitstown.dto.entities.CityEntity;
+import com.example.familybenefitstown.dto.entities.ChildEntity;
 import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.resources.R;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class UserDBConverter {
         .builder()
         .name(prepareDBFunc.apply(userSave.getName()))
         .email(prepareDBFunc.apply(userSave.getEmail()))
-        .cityEntity(new CityEntity(prepareDBFunc.apply(userSave.getIdCity())))
+        .idCity(prepareDBFunc.apply(userSave.getIdCity()))
         .build();
   }
 
@@ -41,11 +42,14 @@ public class UserDBConverter {
    * Преобразует модель таблицы "user" в объект информации о пользователе.
    * В преобразовании не участвуют поля с датами рождениями детей и датой рождения пользователя
    * @param userEntity модель таблицы "user"
+   * @param childEntityList список моделей таблицы "child", связанных с пользователем
+   * @param roleEntityList список моделей таблицы "role", связанных с пользователем
+   * @param nameCity название города пользователя
    * @return информация о пользователе
    */
-  static public UserInfo toInfo(UserEntity userEntity) {
+  static public UserInfo toInfo(UserEntity userEntity, List<ChildEntity> childEntityList, List<RoleEntity> roleEntityList, String nameCity) {
 
-    if (userEntity == null || userEntity.getCityEntity() == null) {
+    if (userEntity == null) {
       return new UserInfo();
     }
 
@@ -54,15 +58,15 @@ public class UserDBConverter {
         .id(userEntity.getId())
         .name(userEntity.getName())
         .email(userEntity.getEmail())
-        .birthDateChildren(userEntity.getChildEntityList()
+        .birthDateChildren(childEntityList
                                .stream()
                                .map(childEntity -> R.SIMPLE_DATE_FORMAT.format(childEntity.getDateBirth()))
                                .collect(Collectors.toList()))
-        .nameRoleSet(userEntity.getRoleEntityList()
+        .nameRoleList(roleEntityList
                          .stream()
                          .map(RoleEntity::getName)
                          .collect(Collectors.toList()))
-        .nameCity(userEntity.getCityEntity().getName())
+        .nameCity(nameCity)
         .build();
   }
 }
