@@ -1,6 +1,5 @@
 package com.example.familybenefitstown.security.services.implementations;
 
-import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
@@ -28,19 +27,6 @@ public class DBIntegrityServiceFB implements DBIntegrityService {
       throw new NotFoundException(String.format(
           "Entity with ID \"%s\" not found in repository %s", id, existFunc.getClass().getName()));
     }
-  }
-
-  /**
-   * Проверяет существование в базе данных объекта по его ID
-   * @param existFunc функция проверки, принимающая параметр типа {@link String} и возвращающая значение типа {@link Boolean}
-   * @param entity проверяемый объект
-   * @param <E> Тип проверяемого объекта
-   * @throws NotFoundException если объект не найден
-   */
-  @Override
-  public <E extends ObjectEntity> void checkExistenceById(Function<String, Boolean> existFunc, E entity) throws NotFoundException {
-
-    checkExistenceById(existFunc, entity.getId());
   }
 
   /**

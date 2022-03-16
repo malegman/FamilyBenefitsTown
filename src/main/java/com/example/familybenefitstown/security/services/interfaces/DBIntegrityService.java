@@ -1,6 +1,5 @@
 package com.example.familybenefitstown.security.services.interfaces;
 
-import com.example.familybenefitstown.dto.entities.ObjectEntity;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 
@@ -19,15 +18,6 @@ public interface DBIntegrityService {
    * @throws NotFoundException если объект не найден
    */
   void checkExistenceById(Function<String, Boolean> existFunc, String id) throws NotFoundException;
-
-  /**
-   * Проверяет существование в базе данных объекта по его ID
-   * @param existFunc функция проверки, принимающая параметр типа {@link String} и возвращающая значение типа {@link Boolean}
-   * @param entity проверяемый объект
-   * @param <E> Тип проверяемого объекта
-   * @throws NotFoundException если объект не найден
-   */
-  <E extends ObjectEntity> void checkExistenceById(Function<String, Boolean> existFunc, E entity) throws NotFoundException;
 
   /**
    * Проверяет отсутствие в базе данных объекта по его уникальному строковому полю
