@@ -2,7 +2,7 @@ package com.example.familybenefitstown.converters;
 
 import com.example.familybenefitstown.api_models.user.UserInfo;
 import com.example.familybenefitstown.api_models.user.UserSave;
-import com.example.familybenefitstown.dto.entities.ChildEntity;
+import com.example.familybenefitstown.dto.entities.ChildBirthEntity;
 import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
@@ -44,12 +44,12 @@ public class UserDBConverter {
    * Преобразует модель таблицы "user" в объект информации о пользователе.
    * В преобразовании не участвуют поля с датами рождениями детей и датой рождения пользователя
    * @param userEntity модель таблицы "user"
-   * @param childEntityList список моделей таблицы "child", связанных с пользователем
+   * @param childBirthEntityList список моделей таблицы "child", связанных с пользователем
    * @param roleEntityList список моделей таблицы "role", связанных с пользователем
    * @param nameCity название города пользователя
    * @return информация о пользователе
    */
-  static public UserInfo toInfo(UserEntity userEntity, List<ChildEntity> childEntityList, List<RoleEntity> roleEntityList, String nameCity) {
+  static public UserInfo toInfo(UserEntity userEntity, List<ChildBirthEntity> childBirthEntityList, List<RoleEntity> roleEntityList, String nameCity) {
 
     if (userEntity == null) {
       return new UserInfo();
@@ -60,7 +60,7 @@ public class UserDBConverter {
         .id(userEntity.getId())
         .name(userEntity.getName())
         .email(userEntity.getEmail())
-        .birthDateChildren(childEntityList
+        .birthDateChildren(childBirthEntityList
                                .stream()
                                .map(childEntity -> R.SIMPLE_DATE_FORMAT.format(childEntity.getDateBirth()))
                                .collect(Collectors.toList()))

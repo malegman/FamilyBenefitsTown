@@ -5,10 +5,10 @@ import com.example.familybenefitstown.api_models.user.UserInitData;
 import com.example.familybenefitstown.api_models.user.UserSave;
 import com.example.familybenefitstown.converters.CityDBConverter;
 import com.example.familybenefitstown.converters.UserDBConverter;
-import com.example.familybenefitstown.dto.entities.ChildEntity;
+import com.example.familybenefitstown.dto.entities.ChildBirthEntity;
 import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
-import com.example.familybenefitstown.dto.repositories.ChildRepository;
+import com.example.familybenefitstown.dto.repositories.ChildBirthRepository;
 import com.example.familybenefitstown.dto.repositories.CityRepository;
 import com.example.familybenefitstown.dto.repositories.RoleRepository;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
@@ -43,7 +43,7 @@ public class UserServiceFB implements UserService {
   /**
    * Репозиторий, работающий с моделью таблицы "child"
    */
-  private final ChildRepository childRepository;
+  private final ChildBirthRepository childBirthRepository;
   /**
    * Репозиторий, работающий с моделью таблицы "role"
    */
@@ -70,7 +70,7 @@ public class UserServiceFB implements UserService {
   /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
-   * @param childRepository репозиторий, работающий с моделью таблицы "child"
+   * @param childBirthRepository репозиторий, работающий с моделью таблицы "child"
    * @param roleRepository репозиторий, работающий с моделью таблицы "role"
    * @param cityRepository репозиторий, работающий с моделью таблицы "city"
    * @param dateTimeService интерфейс сервиса, который предоставляет методы для работы с датой и временем
@@ -79,14 +79,14 @@ public class UserServiceFB implements UserService {
    */
   @Autowired
   public UserServiceFB(UserRepository userRepository,
-                       ChildRepository childRepository,
+                       ChildBirthRepository childBirthRepository,
                        RoleRepository roleRepository,
                        CityRepository cityRepository,
                        DateTimeService dateTimeService,
                        DBIntegrityService dbIntegrityService,
                        MailService mailService) {
     this.userRepository = userRepository;
-    this.childRepository = childRepository;
+    this.childBirthRepository = childBirthRepository;
     this.roleRepository = roleRepository;
     this.cityRepository = cityRepository;
     this.dateTimeService = dateTimeService;
@@ -161,7 +161,7 @@ public class UserServiceFB implements UserService {
     UserEntity userEntityFromRequest = getUserEntity(preparedIdUser);
 
     return UserDBConverter.toInfo(userEntityFromRequest,
-                                  childRepository.findAllByIdUser(preparedIdUser),
+                                  childBirthRepository.findAllByIdUser(preparedIdUser),
                                   roleRepository.findAllByIdUser(preparedIdUser),
                                   cityRepository.findByIdUser(preparedIdUser)
                                       .map(CityEntity::getName).orElse(null));
@@ -299,16 +299,16 @@ public class UserServiceFB implements UserService {
 
     for (LocalDate childBirth : childBirthList) {
 
-      // Получение существующей модели ребенка или же создание новой
-      Optional<ChildEntity> childEntityOpt = childRepository.findByDateBirth(childBirth);
+      // Получение существующей модели рождения ребенка или же создание новой
+      Optional<ChildBirthEntity> childEntityOpt = childBirthRepository.findByDateBirth(childBirth);
 
       if (childEntityOpt.isPresent()) {
         userRepository.addChildToUser(idUser, childEntityOpt.get().getId());
 
       } else {
-        ChildEntity newChildEntity = new ChildEntity(RandomValue.randomString(R.ID_LENGTH), childBirth);
-        childRepository.save(newChildEntity);
-        userRepository.addChildToUser(idUser, newChildEntity.getId());
+        ChildBirthEntity newChildBirthEntity = new ChildBirthEntity(RandomValue.randomString(R.ID_LENGTH), childBirth);
+        childBirthRepository.save(newChildBirthEntity);
+        userRepository.addChildToUser(idUser, newChildBirthEntity.getId());
       }
     }
   }

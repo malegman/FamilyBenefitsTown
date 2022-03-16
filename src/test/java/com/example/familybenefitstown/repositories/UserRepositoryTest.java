@@ -27,7 +27,7 @@ public class UserRepositoryTest {
   @Autowired
   private RoleRepository roleRepository;
   @Autowired
-  private ChildRepository childRepository;
+  private ChildBirthRepository childBirthRepository;
   @Autowired
   private CityRepository cityRepository;
   @Autowired
@@ -258,17 +258,17 @@ public class UserRepositoryTest {
 
   /**
    * <p>
-   *   Тестирует связь <b><i>many-to-many</i></b> таблицы <b>"users_children"</b> между моделями {@link UserEntity} и {@link ChildEntity}.
+   *   Тестирует связь <b><i>many-to-many</i></b> таблицы <b>"users_children"</b> между моделями {@link UserEntity} и {@link ChildBirthEntity}.
    * </p>
    * <p>
    *   Порядок тестирования:
    * </p>
    * <ol>
    *   <li>Создание тестового пользователя.</li>
-   *   <li>Создание связи с существующим в бд ребенком.</li>
+   *   <li>Создание связи с существующим в бд рождением ребенка.</li>
    *   <li>Удаление тестового пользователя, участвующего в связи.</li>
    *   <li>Создание тестового пользователя повторно, добавление связи для её удаления.</li>
-   *   <li>Удаление ребенка после разрыва связи.</li>
+   *   <li>Удаление рождения ребенка после разрыва связи.</li>
    * </ol>
    */
   @Test
@@ -281,24 +281,24 @@ public class UserRepositoryTest {
 
     createUserEntity_TestUser();
     log.info("All test user's children (1)");
-    AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
 
     // 2. Создание связи с существующей в бд ролью.
 
-    ChildEntity testChild = new ChildEntity("id_testChild", LocalDate.of(2010, 10, 10));
+    ChildBirthEntity testChild = new ChildBirthEntity("id_testChild", LocalDate.of(2010, 10, 10));
     log.info("Save child (2)");
-    childRepository.save(testChild);
+    childBirthRepository.save(testChild);
     log.info("Add saved child to test user (2)");
     userRepository.addChildToUser(ID_TEST_USER, testChild.getId());
     log.info("All test user's children (2)");
-    AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(1);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(1);
 
     // 3. Удаление тестового пользователя, участвующего в связи.
 
     log.info("Delete test user with relation (3)");
     userRepository.deleteById(ID_TEST_USER);
     log.info("All test user's children (3)");
-    AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
 
     // 4. Создание тестового пользователя повторно, добавление связи для её удаления.
 
@@ -306,16 +306,16 @@ public class UserRepositoryTest {
     log.info("Add saved child to test user (4)");
     userRepository.addChildToUser(ID_TEST_USER, testChild.getId());
     log.info("All test user's children (4)");
-    AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(1);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(1);
     log.info("Delete all children from test user (4)");
     userRepository.deleteAllChildrenFromUser(ID_TEST_USER);
     log.info("All test user's children (4)");
-    AssertionsForClassTypes.assertThat(childRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findAllByIdUser(ID_TEST_USER).size()).isEqualTo(0);
 
     // 5. Удаление роли после разрыва связи.
 
     log.info("Delete child without relation (5)");
-    childRepository.delete(testChild);
+    childBirthRepository.delete(testChild);
 
     deleteUserEntity_TestUser();
 

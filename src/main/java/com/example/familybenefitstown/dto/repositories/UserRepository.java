@@ -46,14 +46,14 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   UserEntity getSuperAdmin();
 
   /**
-   * Создает связь между существующими ребенком и пользователем, по их ID
+   * Создает связь между существующими рождением ребенка и пользователем, по их ID
    * @param idUser ID пользователя
-   * @param idChild ID ребенка
+   * @param idChildBirth ID рождения ребенка
    */
   @Modifying
   @Query(nativeQuery = true,
-      value = "INSERT INTO family_benefit_town.users_children (id_user, id_child) VALUES (?1, ?2);")
-  void addChildToUser(String idUser, String idChild);
+      value = "INSERT INTO family_benefit_town.users_children (id_user, id_child_birth) VALUES (?1, ?2);")
+  void addChildToUser(String idUser, String idChildBirth);
 
   /**
    * Удаляет связь между пользователем и детьми, по его ID

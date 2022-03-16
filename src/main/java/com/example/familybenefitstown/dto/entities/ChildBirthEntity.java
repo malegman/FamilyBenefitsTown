@@ -11,20 +11,20 @@ import javax.persistence.Table;
 import java.time.LocalDate;
 
 /**
- * Модель записи таблицы "child"
+ * Модель записи таблицы "child_birth"
  */
 @Entity
-@Table(name = "child", schema = "family_benefit_town")
+@Table(name = "child_birth", schema = "family_benefit_town")
 @Getter
 @Setter
 @ToString
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-public class ChildEntity {
+public class ChildBirthEntity {
 
   /**
-   * ID ребенка
+   * ID рождения ребенка
    */
   @NonNull
   @Id
@@ -42,8 +42,8 @@ public class ChildEntity {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    ChildEntity childEntity = (ChildEntity) o;
-    return id.equals(childEntity.id) && dateBirth.equals(childEntity.dateBirth);
+    ChildBirthEntity childBirthEntity = (ChildBirthEntity) o;
+    return id.equals(childBirthEntity.id) && dateBirth.equals(childBirthEntity.dateBirth);
   }
 
   @Override

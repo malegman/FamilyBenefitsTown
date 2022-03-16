@@ -1,8 +1,8 @@
 package com.example.familybenefitstown.repositories;
 
 import com.example.familybenefitstown.FamilyBenefitsTownApplication;
-import com.example.familybenefitstown.dto.entities.ChildEntity;
-import com.example.familybenefitstown.dto.repositories.ChildRepository;
+import com.example.familybenefitstown.dto.entities.ChildBirthEntity;
+import com.example.familybenefitstown.dto.repositories.ChildBirthRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
@@ -16,23 +16,23 @@ import java.time.LocalDate;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {FamilyBenefitsTownApplication.class})
-public class ChildRepositoryTest {
+public class ChildBirthRepositoryTest {
 
   @Autowired
-  private ChildRepository childRepository;
+  private ChildBirthRepository childBirthRepository;
 
   private static final String ID_TEST_CHILD = "id_test_child";
   private static final LocalDate BIRTH_TEST_CHILD = LocalDate.of(2010, 10, 10);
 
   /**
-   * Создает тестового ребенка перед каждым тестом
+   * Создает тестовое рождение ребенка перед каждым тестом
    */
   private void createChildEntity_TestChild() {
 
     log.info("Start createChildEntity_TestChild");
 
     log.info("Save test child");
-    childRepository.save(ChildEntity
+    childBirthRepository.save(ChildBirthEntity
                              .builder()
                              .id(ID_TEST_CHILD)
                              .dateBirth(BIRTH_TEST_CHILD)
@@ -42,16 +42,16 @@ public class ChildRepositoryTest {
   }
 
   /**
-   * Удаляет тестового ребенка после каждого теста
+   * Удаляет тестовое рождение ребенка после каждого теста
    */
   private void deleteChildEntity_TestChild() {
 
     log.info("Start deleteChildEntity_TestChild");
 
     log.info("Exists test child");
-    if (childRepository.existsById(ID_TEST_CHILD)) {
+    if (childBirthRepository.existsById(ID_TEST_CHILD)) {
       log.info("Delete test child");
-      childRepository.deleteById(ID_TEST_CHILD);
+      childBirthRepository.deleteById(ID_TEST_CHILD);
     }
 
     log.info("End deleteChildEntity_TestChild");
@@ -59,7 +59,7 @@ public class ChildRepositoryTest {
 
   /**
    * <p>
-   *   Тестирует таблицу роли <b>"role"</b> по модели {@link ChildEntity}, без связанных таблиц, сущностей.
+   *   Тестирует таблицу роли <b>"child_birth"</b> по модели {@link ChildBirthEntity}, без связанных таблиц, сущностей.
    * </p>
    * <p>
    *   Порядок тестирования:
@@ -76,17 +76,17 @@ public class ChildRepositoryTest {
     createChildEntity_TestChild();
 
     log.info("Get test child");
-    ChildEntity testChild = childRepository.findById(ID_TEST_CHILD).orElseThrow();
+    ChildBirthEntity testChild = childBirthRepository.findById(ID_TEST_CHILD).orElseThrow();
 
     AssertionsForClassTypes.assertThat(testChild.getId()).isEqualTo(ID_TEST_CHILD);
     AssertionsForClassTypes.assertThat(testChild.getDateBirth()).isEqualTo(BIRTH_TEST_CHILD);
 
     testChild.setDateBirth(LocalDate.of(2020, 1, 5));
     log.info("Save changed test child");
-    childRepository.save(testChild);
+    childBirthRepository.save(testChild);
 
     log.info("Get test child");
-    testChild = childRepository.findById(ID_TEST_CHILD).orElseThrow();
+    testChild = childBirthRepository.findById(ID_TEST_CHILD).orElseThrow();
 
     AssertionsForClassTypes.assertThat(testChild.getId()).isEqualTo(ID_TEST_CHILD);
     AssertionsForClassTypes.assertThat(testChild.getDateBirth()).isEqualTo(LocalDate.of(2020, 1, 5));
@@ -98,7 +98,7 @@ public class ChildRepositoryTest {
 
   /**
    * <p>
-   *   Тестирует дополнительные методы репозитория {@link ChildRepository}.
+   *   Тестирует дополнительные методы репозитория {@link ChildBirthRepository}.
    * </p>
    * <p>
    *   Порядок тестирования:
@@ -117,12 +117,12 @@ public class ChildRepositoryTest {
     // 1. findByDateBirth(dateBirth)
 
     log.info("Get test child");
-    ChildEntity testChild = childRepository.findById(ID_TEST_CHILD).orElseThrow();
+    ChildBirthEntity testChild = childBirthRepository.findById(ID_TEST_CHILD).orElseThrow();
 
     log.info("Find by existing date");
-    AssertionsForClassTypes.assertThat(childRepository.findByDateBirth(BIRTH_TEST_CHILD).orElseThrow()).isEqualTo(testChild);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findByDateBirth(BIRTH_TEST_CHILD).orElseThrow()).isEqualTo(testChild);
     log.info("Find by not existing date");
-    AssertionsForClassTypes.assertThat(childRepository.findByDateBirth(LocalDate.of(2020, 1, 5)).isEmpty()).isEqualTo(true);
+    AssertionsForClassTypes.assertThat(childBirthRepository.findByDateBirth(LocalDate.of(2020, 1, 5)).isEmpty()).isEqualTo(true);
 
     deleteChildEntity_TestChild();
 
