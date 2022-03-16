@@ -101,11 +101,5 @@ public interface TokenCodeService {
    * @param idUser ID пользователя
    */
   void removeLoginCodeByIdUser(String idUser);
-
-  /**
-   * Удаляет токен восстановления и код входа по ID пользователя
-   * @param idUser ID пользователя
-   */
-  void removeTokenCodeByIdUser(String idUser);
 }
 

@@ -20,6 +20,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.Cookie;
@@ -292,6 +293,7 @@ public class TokenCodeServiceFB implements TokenCodeService {
    * @param refreshToken токен восстановления пользователя
    */
   @Override
+  @Transactional
   public void removeRefreshToken(String refreshToken) {
 
     String prepareRefreshToken = dbIntegrityService.preparePostgreSQLString(refreshToken);
@@ -307,20 +309,6 @@ public class TokenCodeServiceFB implements TokenCodeService {
   public void removeLoginCodeByIdUser(String idUser) {
 
     String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    loginCodeRepository.deleteById(prepareIdUser);
-    log.info("DB. User login code with id \"{}\" deleted.", idUser);
-  }
-
-  /**
-   * Удаляет токен восстановления и код входа по ID пользователя
-   * @param idUser ID пользователя
-   */
-  @Override
-  public void removeTokenCodeByIdUser(String idUser) {
-
-    String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    refreshTokenRepository.deleteById(prepareIdUser);
-    log.info("DB. User refresh token with id \"{}\" deleted.", idUser);
     loginCodeRepository.deleteById(prepareIdUser);
     log.info("DB. User login code with id \"{}\" deleted.", idUser);
   }
