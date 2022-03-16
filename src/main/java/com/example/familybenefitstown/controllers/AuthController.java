@@ -2,6 +2,7 @@ package com.example.familybenefitstown.controllers;
 
 import com.example.familybenefitstown.api_models.auth.LoginResponse;
 import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.services.interfaces.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Контроллер запросов, связанных с аутентификацией и авторизацией в системе
@@ -68,6 +70,7 @@ public class AuthController {
    * @param email почта пользователя
    * @param loginCode код для входа пользователя
    * @param request http запрос
+   * @param response http ответ
    * @return объект ответа на вход, если запрос выполнен успешно, и код ответа
    */
   @PostMapping(
@@ -76,13 +79,24 @@ public class AuthController {
   @ResponseBody
   public ResponseEntity<LoginResponse> login(@RequestParam(name = "e") String email,
                                              @RequestParam(name = "lc") int loginCode,
-                                             HttpServletRequest request) {
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
 
     String requestAddress = request.getRemoteAddr();
     log.debug("{} POST \"/auth/login?e={}&lc={}\": Request in controller", requestAddress, email, loginCode);
 
-    LoginResponse loginResponse = authService.login(email, loginCode);
-    return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    try {
+      LoginResponse loginResponse = authService.login(email, loginCode);
+      return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+
+    } catch (NotFoundException e) {
+      // Не найден пользователь
+      // Удаление заголовков, установленных фильтром
+      response.setHeader(R.AUTHORIZATION_HEADER, "");
+      response.setHeader(R.SET_COOKIE_HEADER, "");
+      log.warn("{} POST \"/auth/login?e={}&lc={}\": {}", requestAddress, email, loginCode, e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
   }
 
   /**
