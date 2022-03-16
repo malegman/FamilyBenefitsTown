@@ -24,8 +24,9 @@ public interface AuthService {
    * @param email почта пользователя
    * @param loginCode код для входа пользователя
    * @return объект ответа на вход в систему
+   * @throws NotFoundException если пользователь с данным email не найден
    */
-  LoginResponse login(String email, int loginCode);
+  LoginResponse login(String email, int loginCode) throws NotFoundException;
 
   /**
    * Выход из системы
