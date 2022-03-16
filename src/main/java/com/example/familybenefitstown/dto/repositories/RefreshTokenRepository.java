@@ -2,7 +2,7 @@ package com.example.familybenefitstown.dto.repositories;
 
 import com.example.familybenefitstown.dto.entities.RefreshTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.Optional;
 
@@ -22,6 +22,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
    * Удаляет модель токена восстановления по значению токена
    * @param refreshToken значение токена восстановления
    */
-  @Transactional
+  @Modifying
   void deleteByToken(String refreshToken);
 }
