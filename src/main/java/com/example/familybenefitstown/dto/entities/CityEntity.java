@@ -1,11 +1,13 @@
 package com.example.familybenefitstown.dto.entities;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Модель записи таблицы "cityEntity"
@@ -18,7 +20,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-public class CityEntity extends ObjectEntity {
+public class CityEntity {
 
   /**
    * ID города
@@ -38,22 +40,19 @@ public class CityEntity extends ObjectEntity {
   /**
    * Информация города
    */
-  @Nullable
   @Column(name = "info")
   private String info;
 
-  /**
-   * Список пользователей с данным городом
-   */
-  @OneToMany(mappedBy = "cityEntity")
-  @ToString.Exclude
-  private List<UserEntity> userEntityList;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    CityEntity cityEntity = (CityEntity) o;
+    return id.equals(cityEntity.id) && name.equals(cityEntity.name);
+  }
 
-  /**
-   * Конструктор для создания модели по ID
-   * @param id ID города
-   */
-  public CityEntity(@NonNull String id) {
-    this.id = id;
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }

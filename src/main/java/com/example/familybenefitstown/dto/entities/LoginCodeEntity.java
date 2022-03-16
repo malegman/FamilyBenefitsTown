@@ -1,6 +1,7 @@
 package com.example.familybenefitstown.dto.entities;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.Column;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-public class LoginCodeEntity extends ObjectEntity {
+public class LoginCodeEntity {
 
   /**
    * ID пользователя
@@ -42,4 +43,17 @@ public class LoginCodeEntity extends ObjectEntity {
   @NonNull
   @Column(name = "date_expiration")
   private LocalDateTime dateExpiration;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    LoginCodeEntity loginCodeEntity = (LoginCodeEntity) o;
+    return idUser.equals(loginCodeEntity.idUser) && code == loginCodeEntity.code;
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }
