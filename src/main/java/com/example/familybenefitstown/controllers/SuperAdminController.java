@@ -3,6 +3,7 @@ package com.example.familybenefitstown.controllers;
 import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.services.interfaces.SuperAdminService;
 import lombok.extern.slf4j.Slf4j;
@@ -61,9 +62,10 @@ public class SuperAdminController {
       superAdminService.create(adminSave);
       return ResponseEntity.status(HttpStatus.CREATED).build();
 
-    } catch (AlreadyExistsException | InvalidEmailException e) {
+    } catch (AlreadyExistsException | InvalidEmailException | InvalidStringException e) {
       // Администратор или пользователь с указанным email существует.
       // Строка в поле "email" не является email.
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} POST \"/sa/admins\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }

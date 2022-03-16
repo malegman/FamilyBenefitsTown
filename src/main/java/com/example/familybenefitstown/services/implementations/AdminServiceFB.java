@@ -8,6 +8,7 @@ import com.example.familybenefitstown.dto.repositories.RoleRepository;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.services.interfaces.AdminService;
@@ -85,9 +86,10 @@ public class AdminServiceFB implements AdminService {
    * @throws NotFoundException если администратор с указанными данными не найден
    * @throws InvalidEmailException если указанный "email" не является email
    * @throws AlreadyExistsException если администратор или пользователь с отличным ID и данным email уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   @Override
-  public void update(String idAdmin, AdminSave adminSave) throws NotFoundException, InvalidEmailException, AlreadyExistsException {
+  public void update(String idAdmin, AdminSave adminSave) throws NotFoundException, InvalidEmailException, AlreadyExistsException, InvalidStringException {
 
     // Проверка строки email на соответствие формату email
     mailService.checkEmailElseThrow(adminSave.getEmail());

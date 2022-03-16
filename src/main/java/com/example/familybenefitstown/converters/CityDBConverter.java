@@ -4,6 +4,8 @@ import com.example.familybenefitstown.api_models.city.CityInfo;
 import com.example.familybenefitstown.api_models.city.CitySave;
 import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.dto.entities.CityEntity;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
+import com.example.familybenefitstown.resources.R;
 
 import java.util.function.Function;
 
@@ -17,8 +19,9 @@ public class CityDBConverter {
    * @param citySave объект запроса на сохранение города
    * @param prepareDBFunc функция обработки строки для БД
    * @return модель таблицы "city"
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  static public CityEntity fromSave(CitySave citySave, Function<String, String> prepareDBFunc) {
+  static public CityEntity fromSave(CitySave citySave, Function<String, String> prepareDBFunc) throws InvalidStringException {
 
     if (citySave == null) {
       return new CityEntity();
@@ -26,8 +29,8 @@ public class CityDBConverter {
 
     return CityEntity
         .builder()
-        .name(prepareDBFunc.apply(citySave.getName()))
-        .info(prepareDBFunc.apply(citySave.getInfo()))
+        .name(prepareDBFunc.apply(withSymbolsField(citySave.getName(), "name", true)))
+        .info(prepareDBFunc.apply(withSymbolsField(citySave.getInfo(), "info", false)))
         .build();
   }
 
@@ -66,6 +69,29 @@ public class CityDBConverter {
         .idObject(cityEntity.getId())
         .nameObject(cityEntity.getName())
         .build();
+  }
+
+  /**
+   * Проверяет строковое поле на содержание букв латиницы и кириллицы и цифр.
+   * При успешной проверки возвращается проверяемая строка без изменений.
+   * Иначе выбрасывается исключение.
+   * @param str проверяемая строка
+   * @param field поле, значение которого проверяется
+   * @param isRequired true, если поле является обязательным, не может быть null
+   * @return проверяемая строка при успешной проверке
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
+   */
+  private static String withSymbolsField(String str, String field, boolean isRequired) throws InvalidStringException {
+
+    if (str == null && !isRequired) {
+      return null;
+    }
+    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).matches()) {
+      return str;
+    }
+
+    throw new InvalidStringException(String.format(
+        "Attempt to store a string without letters and numbers in the \"%s\" field ", field));
   }
 }
 

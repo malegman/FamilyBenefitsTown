@@ -4,6 +4,7 @@ import com.example.familybenefitstown.api_models.city.CityInfo;
 import com.example.familybenefitstown.api_models.city.CitySave;
 import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.services.interfaces.CityService;
 import lombok.extern.slf4j.Slf4j;
@@ -86,8 +87,9 @@ public class CityController {
       cityService.create(citySave);
       return ResponseEntity.status(HttpStatus.CREATED).build();
 
-    } catch (AlreadyExistsException e) {
-      // Город с указанным названием существует
+    } catch (AlreadyExistsException | InvalidStringException e) {
+      // Город с указанным названием существует.
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} POST \"/cities\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
@@ -159,8 +161,9 @@ public class CityController {
       log.warn("{} PUT \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (AlreadyExistsException e) {
-      // Город с отличным ID и данным названием уже существует
+    } catch (AlreadyExistsException | InvalidStringException e) {
+      // Город с отличным ID и данным названием уже существует.
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} PUT \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }

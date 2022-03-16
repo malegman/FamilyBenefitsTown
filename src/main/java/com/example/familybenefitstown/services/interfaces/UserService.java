@@ -18,13 +18,15 @@ public interface UserService {
    * @throws InvalidEmailException если указанный "email" не является email
    * @throws DateFormatException если даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy"
    * @throws DateTimeException если даты рождения пользователя или детей позже текущей даты
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   void create(UserSave userSave) throws
       NotFoundException,
       AlreadyExistsException,
       InvalidEmailException,
       DateFormatException,
-      DateTimeException;
+      DateTimeException,
+      InvalidStringException;
 
   /**
    * Возвращает пользователя об учреждении по его ID
@@ -43,13 +45,15 @@ public interface UserService {
    * @throws DateFormatException если даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy"
    * @throws DateTimeException если даты рождения пользователя или детей позже текущей даты
    * @throws AlreadyExistsException если пользователь с отличным ID и данным email уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   void update(String idUser, UserSave userSave) throws
       NotFoundException,
       InvalidEmailException,
       DateFormatException,
       DateTimeException,
-      AlreadyExistsException;
+      AlreadyExistsException,
+      InvalidStringException;
 
   /**
    * Удаляет пользователя по его ID или удаляет роль "ROLE_USER" у администратора

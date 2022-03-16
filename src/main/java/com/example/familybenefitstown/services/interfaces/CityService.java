@@ -4,6 +4,7 @@ import com.example.familybenefitstown.api_models.city.CityInfo;
 import com.example.familybenefitstown.api_models.city.CitySave;
 import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 
 import java.util.Set;
@@ -27,8 +28,9 @@ public interface CityService {
    * @param citySave объект запроса на сохранение города
    * @throws AlreadyExistsException если город с указанным названием уже существует
    * @throws NotFoundException если пособие города с указанным ID не найдено
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  void create(CitySave citySave) throws AlreadyExistsException, NotFoundException;
+  void create(CitySave citySave) throws AlreadyExistsException, NotFoundException, InvalidStringException;
 
   /**
    * Возвращает информацию о городе по его ID
@@ -44,8 +46,9 @@ public interface CityService {
    * @param citySave объект запроса на сохранение города
    * @throws NotFoundException если город с указанным ID не найден
    * @throws AlreadyExistsException если город с отличным ID и данным названием уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  void update(String idCity, CitySave citySave) throws NotFoundException, AlreadyExistsException;
+  void update(String idCity, CitySave citySave) throws NotFoundException, AlreadyExistsException, InvalidStringException;
 
   /**
    * Удаляет город по его ID

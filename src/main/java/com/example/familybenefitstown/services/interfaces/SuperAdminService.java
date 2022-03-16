@@ -3,6 +3,7 @@ package com.example.familybenefitstown.services.interfaces;
 import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 
 /**
@@ -15,8 +16,9 @@ public interface SuperAdminService {
    * @param adminSave объект запроса на сохранение администратора
    * @throws AlreadyExistsException если администратор или пользователь с указанным email уже существует
    * @throws InvalidEmailException если указанный "email" не является email
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException;
+  void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException, InvalidStringException;
 
   /**
    * Удаляет администратора по его ID или удаляет роль "ROLE_ADMIN" у пользователя

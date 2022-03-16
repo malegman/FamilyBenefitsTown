@@ -6,6 +6,7 @@ import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
@@ -59,10 +60,11 @@ public class SuperAdminServiceFB implements SuperAdminService {
    * @param adminSave объект запроса на сохранение администратора
    * @throws AlreadyExistsException если администратор или пользователь с указанным email уже существует
    * @throws InvalidEmailException если указанный "email" не является email
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   @Override
   @Transactional
-  public void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException {
+  public void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException, InvalidStringException {
 
     // Проверка строки email на соответствие формату email
     mailService.checkEmailElseThrow(adminSave.getEmail());

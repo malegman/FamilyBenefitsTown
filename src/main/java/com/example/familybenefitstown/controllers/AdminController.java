@@ -4,6 +4,7 @@ import com.example.familybenefitstown.api_models.admin.AdminInfo;
 import com.example.familybenefitstown.api_models.admin.AdminSave;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.services.interfaces.AdminService;
 import lombok.extern.slf4j.Slf4j;
@@ -99,9 +100,10 @@ public class AdminController {
       log.warn("{} PUT \"/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (InvalidEmailException | AlreadyExistsException e) {
+    } catch (InvalidEmailException | AlreadyExistsException | InvalidStringException e) {
       // Строка в поле "email" не является email.
-      // Администратор или пользователь с отличным ID и данным email уже существует
+      // Администратор или пользователь с отличным ID и данным email уже существует.
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} PUT \"/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }

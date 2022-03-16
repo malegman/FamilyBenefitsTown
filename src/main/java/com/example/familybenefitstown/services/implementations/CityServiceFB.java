@@ -7,6 +7,7 @@ import com.example.familybenefitstown.converters.CityDBConverter;
 import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.dto.repositories.CityRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
+import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.security.generator.RandomValue;
@@ -70,9 +71,10 @@ public class CityServiceFB implements CityService {
    * @param citySave объект запроса на сохранение города
    * @throws AlreadyExistsException если город с указанным названием уже существует
    * @throws NotFoundException если пособие города с указанным ID не найдено
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   @Override
-  public void create(CitySave citySave) throws AlreadyExistsException, NotFoundException {
+  public void create(CitySave citySave) throws AlreadyExistsException, NotFoundException, InvalidStringException {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter
@@ -111,9 +113,10 @@ public class CityServiceFB implements CityService {
    * @param citySave объект запроса на сохранение города
    * @throws NotFoundException если город с указанным ID не найден
    * @throws AlreadyExistsException если город с отличным ID и данным названием уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   @Override
-  public void update(String idCity, CitySave citySave) throws NotFoundException, AlreadyExistsException {
+  public void update(String idCity, CitySave citySave) throws NotFoundException, AlreadyExistsException, InvalidStringException {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter

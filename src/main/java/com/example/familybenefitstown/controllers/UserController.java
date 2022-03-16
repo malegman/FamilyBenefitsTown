@@ -66,14 +66,12 @@ public class UserController {
       log.warn("{} POST \"/users\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (AlreadyExistsException
-        | InvalidEmailException
-        | DateTimeException
-        | DateFormatException e) {
+    } catch (AlreadyExistsException | InvalidEmailException | DateTimeException | DateFormatException | InvalidStringException e) {
       // Администратор или пользователь с указанным email существует.
       // Строка в поле "email" не является email.
       // Даты позже текущей даты.
       // Даты не соответствуют формату "dd.mm.yyyy".
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} POST \"/users\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -140,14 +138,12 @@ public class UserController {
       log.warn("{} PUT \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-    } catch (InvalidEmailException
-        | DateTimeException
-        | DateFormatException
-        | AlreadyExistsException e) {
+    } catch (InvalidEmailException | DateTimeException | DateFormatException | AlreadyExistsException | InvalidStringException e) {
       // Строка в поле "email" не является email.
       // Даты позже текущей даты.
       // Даты не соответствуют формату "dd.mm.yyyy".
       // Пользователь с отличным ID и данным email уже существует.
+      // Некорректное строковое поле объекта запроса.
       log.warn("{} PUT \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
