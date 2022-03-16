@@ -10,22 +10,22 @@ import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.dto.repositories.ChildRepository;
 import com.example.familybenefitstown.dto.repositories.CityRepository;
+import com.example.familybenefitstown.dto.repositories.RoleRepository;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.*;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
 import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
-import com.example.familybenefitstown.security.services.interfaces.TokenCodeService;
 import com.example.familybenefitstown.services.interfaces.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,25 +39,25 @@ public class UserServiceFB implements UserService {
    * Репозиторий, работающий с моделью таблицы "user"
    */
   private final UserRepository userRepository;
+
   /**
    * Репозиторий, работающий с моделью таблицы "child"
    */
   private final ChildRepository childRepository;
-
   /**
-   * Интерфейс сервиса модели таблицы "city", целостность которой зависит от связанных таблиц
+   * Репозиторий, работающий с моделью таблицы "role"
    */
-  private final EntityDBService<CityEntity, CityRepository> cityDBService;
+  private final RoleRepository roleRepository;
+  /**
+   * Репозиторий, работающий с моделью таблицы "city"
+   */
+  private final CityRepository cityRepository;
 
   /**
    * Интерфейс сервиса, который предоставляет методы для работы с датой и временем
    */
   private final DateTimeService dateTimeService;
 
-  /**
-   * Интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
-   */
-  private final TokenCodeService tokenCodeService;
   /**
    * Интерфейс сервиса, отвечающего за целостность базы данных
    */
@@ -71,24 +71,24 @@ public class UserServiceFB implements UserService {
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
    * @param childRepository репозиторий, работающий с моделью таблицы "child"
-   * @param cityDBService интерфейс сервиса модели таблицы "city", целостность которой зависит от связанных таблиц
+   * @param roleRepository репозиторий, работающий с моделью таблицы "role"
+   * @param cityRepository репозиторий, работающий с моделью таблицы "city"
    * @param dateTimeService интерфейс сервиса, который предоставляет методы для работы с датой и временем
-   * @param tokenCodeService интерфейс сервиса для работы с токенами доступа (в формате jwt) и восстановления и кодом для входа
    * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
    * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public UserServiceFB(UserRepository userRepository,
                        ChildRepository childRepository,
-                       EntityDBService<CityEntity, CityRepository> cityDBService,
+                       RoleRepository roleRepository,
+                       CityRepository cityRepository,
                        DateTimeService dateTimeService,
-                       TokenCodeService tokenCodeService,
                        DBIntegrityService dbIntegrityService,
                        MailService mailService) {
     this.userRepository = userRepository;
     this.childRepository = childRepository;
-    this.tokenCodeService = tokenCodeService;
-    this.cityDBService = cityDBService;
+    this.roleRepository = roleRepository;
+    this.cityRepository = cityRepository;
     this.dateTimeService = dateTimeService;
     this.dbIntegrityService = dbIntegrityService;
     this.mailService = mailService;
@@ -104,6 +104,7 @@ public class UserServiceFB implements UserService {
    * @throws DateTimeException если даты рождения пользователя или детей позже текущей даты
    */
   @Override
+  @Transactional
   public void create(UserSave userSave) throws
       NotFoundException,
       AlreadyExistsException,
@@ -120,7 +121,7 @@ public class UserServiceFB implements UserService {
 
     // Проверка существования города по ID
     dbIntegrityService.checkExistenceById(
-        cityDBService.getRepository()::existsById, userEntityFromSave.getCityEntity());
+        cityRepository::existsById, userEntityFromSave.getIdCity());
 
     // Проверка на отсутствие пользователя или администратора по email
     dbIntegrityService.checkAbsenceByUniqStr(
@@ -135,10 +136,12 @@ public class UserServiceFB implements UserService {
     dateTimeService.checkDateBeforeNow(childBirthList);
 
     userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
-    userEntityFromSave.setRoleEntityList(Collections.singletonList(RDB.ROLE_USER));
-    userEntityFromSave.setChildEntityList(childEntityFromBirth(childBirthList));
 
     userRepository.save(userEntityFromSave);
+    userRepository.addRoleToUser(userEntityFromSave.getId(), RDB.ID_ROLE_USER);
+    userRepository.deleteAllChildrenFromUser(userEntityFromSave.getId());
+    setChildrenToUser(userEntityFromSave.getId(), childBirthList);
+
     log.info("DB. User with email \"{}\" created.", userSave.getEmail());
   }
 
@@ -152,10 +155,14 @@ public class UserServiceFB implements UserService {
   public UserInfo read(String idUser) throws NotFoundException {
 
     // Получение пользователя по его ID, если пользователь существует
-    String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
+    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
+    UserEntity userEntityFromRequest = getUserEntity(preparedIdUser);
 
-    return UserDBConverter.toInfo(userEntityFromRequest);
+    return UserDBConverter.toInfo(userEntityFromRequest,
+                                  childRepository.findAllByIdUser(preparedIdUser),
+                                  roleRepository.findAllByIdUser(preparedIdUser),
+                                  cityRepository.findByIdUser(preparedIdUser)
+                                      .map(CityEntity::getName).orElse(null));
   }
 
   /**
@@ -169,6 +176,7 @@ public class UserServiceFB implements UserService {
    * @throws AlreadyExistsException если пользователь с отличным ID и данным email уже существует
    */
   @Override
+  @Transactional
   public void update(String idUser, UserSave userSave) throws
       NotFoundException,
       InvalidEmailException,
@@ -183,18 +191,18 @@ public class UserServiceFB implements UserService {
     UserEntity userEntityFromSave = UserDBConverter
         .fromSave(userSave, dbIntegrityService::preparePostgreSQLString);
 
-    String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
+    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
 
     // Проверка существования города по ID
     dbIntegrityService.checkExistenceById(
-        cityDBService.getRepository()::existsById, userEntityFromSave.getCityEntity());
+        cityRepository::existsById, userEntityFromSave.getIdCity());
 
     // Проверка отсутствия пользователя с отличным от данного ID и данным email
     dbIntegrityService.checkAbsenceAnotherByUniqStr(
-        userRepository::existsByIdIsNotAndName, prepareIdUser, userEntityFromSave.getEmail());
+        userRepository::existsByIdIsNotAndEmail, preparedIdUser, userEntityFromSave.getEmail());
 
     // Получение пользователя по его ID, если пользователь существует
-    UserEntity userEntityFromDB = getUserEntity(prepareIdUser);
+    UserEntity userEntityFromDB = getUserEntity(preparedIdUser);
 
     // Преобразование дат рождения пользователя и рождения детей
     userEntityFromDB.setDateBirth(dateTimeService.strToDate(userSave.getDateBirth()));
@@ -206,9 +214,10 @@ public class UserServiceFB implements UserService {
 
     userEntityFromDB.setEmail(userEntityFromSave.getEmail());
     userEntityFromDB.setName(userEntityFromSave.getName());
-    userEntityFromDB.setChildEntityList(childEntityFromBirth(childBirthList));
 
     userRepository.save(userEntityFromDB);
+    userRepository.deleteAllChildrenFromUser(preparedIdUser);
+    setChildrenToUser(preparedIdUser, childBirthList);
     log.info("DB. User with ID \"{}\" updated.", idUser);
   }
 
@@ -218,21 +227,20 @@ public class UserServiceFB implements UserService {
    * @throws NotFoundException если пользователь с указанным ID не найден
    */
   @Override
+  @Transactional
   public void delete(String idUser) throws NotFoundException {
 
-    // Получение пользователя по его ID, если пользователь существует
-    String prepareIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    UserEntity userEntityFromRequest = getUserEntity(prepareIdUser);
+    // Проверка существования пользователя по ID
+    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
+    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdUser);
 
     // Если есть роль "ROLE_ADMIN", удаление роли "ROLE_USER", иначе удаление пользователя и его токена восстановления
-    if (userEntityFromRequest.hasRole(RDB.ROLE_ADMIN)) {
-      userEntityFromRequest.deleteRole(RDB.ROLE_USER);
-      userRepository.save(userEntityFromRequest);
+    if (userRepository.hasUserRole(preparedIdUser, RDB.ID_ROLE_ADMIN)) {
+      userRepository.deleteRoleFromUser(preparedIdUser, RDB.ID_ROLE_ADMIN);
       log.info("DB. User with ID \"{}\" updated. Removed role \"{}\"", idUser, RDB.NAME_ROLE_USER);
     } else {
-      userRepository.deleteById(prepareIdUser);
+      userRepository.deleteById(preparedIdUser);
       log.info("DB. User with ID \"{}\" deleted.", idUser);
-      tokenCodeService.removeRefreshToken(prepareIdUser);
     }
   }
 
@@ -246,8 +254,7 @@ public class UserServiceFB implements UserService {
 
     return UserInitData
         .builder()
-        .shortCitySet(cityDBService
-                          .findAllFull()
+        .shortCitySet(cityRepository.findAll()
                           .stream()
                           .map(CityDBConverter::toShortInfo)
                           .collect(Collectors.toList()))
@@ -279,15 +286,26 @@ public class UserServiceFB implements UserService {
             "User with ID \"%s\" not found", prepareId)));
   }
 
-  private List<ChildEntity> childEntityFromBirth(List<LocalDate> childBirthList) {
-
-    List<ChildEntity> childEntityList = new ArrayList<>(childBirthList.size());
+  /**
+   * Добавляет детей по их дням рождениям указанному пользователю по его ID
+   * @param idUser ID пользователя, которому добавляются модели детей
+   * @param childBirthList список дней рождений детей
+   */
+  private void setChildrenToUser(String idUser, List<LocalDate> childBirthList) {
 
     for (LocalDate childBirth : childBirthList) {
-      childEntityList.add(childRepository.findByDateBirth(childBirth).orElse(
-          new ChildEntity(RandomValue.randomString(R.ID_LENGTH), childBirth, Collections.emptyList())));
-    }
 
-    return childEntityList;
+      // Получение существующей модели ребенка или же создание новой
+      Optional<ChildEntity> childEntityOpt = childRepository.findByDateBirth(childBirth);
+
+      if (childEntityOpt.isPresent()) {
+        userRepository.addChildToUser(idUser, childEntityOpt.get().getId());
+
+      } else {
+        ChildEntity newChildEntity = new ChildEntity(RandomValue.randomString(R.ID_LENGTH), childBirth);
+        childRepository.save(newChildEntity);
+        userRepository.addChildToUser(idUser, newChildEntity.getId());
+      }
+    }
   }
 }
