@@ -6,6 +6,7 @@ import com.example.familybenefitstown.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.security.generator.RandomValue;
 
 import java.util.function.Function;
 
@@ -16,12 +17,13 @@ public class CityDBConverter {
 
   /**
    * Преобразует объект запроса на сохранение города в модель таблицы "city", обрабатывая строковые поля для БД
+   * @param idCity ID города. Если {@code null}, значение ID генерируется.
    * @param citySave объект запроса на сохранение города
    * @param prepareDBFunc функция обработки строки для БД
    * @return модель таблицы "city"
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  static public CityEntity fromSave(CitySave citySave, Function<String, String> prepareDBFunc) throws InvalidStringException {
+  static public CityEntity fromSave(String idCity, CitySave citySave, Function<String, String> prepareDBFunc) throws InvalidStringException {
 
     if (citySave == null) {
       return new CityEntity();
@@ -29,6 +31,9 @@ public class CityDBConverter {
 
     return CityEntity
         .builder()
+        .id(idCity != null
+                ? prepareDBFunc.apply(idCity)
+                : RandomValue.randomString(R.ID_LENGTH))
         .name(prepareDBFunc.apply(withSymbolsField(citySave.getName(), "name", true)))
         .info(prepareDBFunc.apply(withSymbolsField(citySave.getInfo(), "info", false)))
         .build();
@@ -86,7 +91,7 @@ public class CityDBConverter {
     if (str == null && !isRequired) {
       return null;
     }
-    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).matches()) {
+    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).find()) {
       return str;
     }
 

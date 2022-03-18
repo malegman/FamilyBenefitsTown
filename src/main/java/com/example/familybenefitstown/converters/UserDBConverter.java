@@ -7,6 +7,7 @@ import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.resources.R;
+import com.example.familybenefitstown.security.generator.RandomValue;
 
 import java.util.List;
 import java.util.function.Function;
@@ -21,12 +22,13 @@ public class UserDBConverter {
   /**
    * Преобразует объект запроса на сохранение пользователя в модель таблицы "user", обрабатывая строковые поля для БД.
    * В преобразовании не участвуют поля с датами рождениями детей и датой рождения пользователя
+   * @param idUser ID пользователя. Если {@code null}, значение ID генерируется.
    * @param userSave объект запроса на сохранение пользователя
    * @param prepareDBFunc функция обработки строки для БД
    * @return модель таблицы "user"
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  static public UserEntity fromSave(UserSave userSave, Function<String, String> prepareDBFunc) throws InvalidStringException {
+  static public UserEntity fromSave(String idUser, UserSave userSave, Function<String, String> prepareDBFunc) throws InvalidStringException {
 
     if (userSave == null) {
       return new UserEntity();
@@ -34,6 +36,9 @@ public class UserDBConverter {
 
     return UserEntity
         .builder()
+        .id(idUser != null
+                ? prepareDBFunc.apply(idUser)
+                : RandomValue.randomString(R.ID_LENGTH))
         .name(prepareDBFunc.apply(withSymbolsField(userSave.getName(), "name", true)))
         .email(prepareDBFunc.apply(withSymbolsField(userSave.getEmail(), "email", true)))
         .idCity(prepareDBFunc.apply(withSymbolsField(userSave.getIdCity(), "idCity", true)))
@@ -87,7 +92,7 @@ public class UserDBConverter {
     if (str == null && !isRequired) {
       return null;
     }
-    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).matches()) {
+    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).find()) {
       return str;
     }
 
