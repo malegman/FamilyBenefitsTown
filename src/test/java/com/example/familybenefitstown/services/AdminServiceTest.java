@@ -1,7 +1,8 @@
 package com.example.familybenefitstown.services;
 
 import com.example.familybenefitstown.FamilyBenefitsTownApplication;
-import com.example.familybenefitstown.api_models.admin.AdminSave;
+import com.example.familybenefitstown.part_res_rest_api.api_models.admin.AdminInfo;
+import com.example.familybenefitstown.part_res_rest_api.api_models.admin.AdminSave;
 import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
@@ -9,7 +10,7 @@ import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.RDB;
 import com.example.familybenefitstown.resources.TE;
-import com.example.familybenefitstown.services.interfaces.AdminService;
+import com.example.familybenefitstown.part_res_rest_api.services.interfaces.AdminService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -31,7 +34,7 @@ public class AdminServiceTest {
   private UserRepository userRepository;
 
   /**
-   * Создает тестового пользователя перед каждым тестом
+   * Создает тестовых пользователей перед каждым тестом
    */
   @Transactional
   public void createTestUsers() {
@@ -59,7 +62,7 @@ public class AdminServiceTest {
   }
 
   /**
-   * Удаляет тестового пользователя после каждого теста
+   * Удаляет тестовых пользователей после каждого теста
    */
   private void deleteTestUsers() {
 
@@ -119,8 +122,12 @@ public class AdminServiceTest {
     // 3. Запрос существующего администратора с ролью пользователя.
 
     try {
-      AssertionsForClassTypes.assertThat(
-          adminService.read(TE.UE_USER_ADMIN.getId()).getNameRoleList().size()).isEqualTo(2);
+      AdminInfo adminInfo = adminService.read(TE.UE_USER_ADMIN.getId());
+      AssertionsForClassTypes.assertThat(adminInfo.getId()).isEqualTo(TE.UE_USER_ADMIN.getId());
+      AssertionsForClassTypes.assertThat(adminInfo.getName()).isEqualTo(TE.UE_USER_ADMIN.getName());
+      AssertionsForClassTypes.assertThat(adminInfo.getEmail()).isEqualTo(TE.UE_USER_ADMIN.getEmail());
+      AssertionsForClassTypes.assertThat(adminInfo.getNameRoleList())
+          .isEqualTo(List.of(RDB.ROLE_USER, RDB.ROLE_ADMIN));
     } catch (NotFoundException e) {
       log.info(e.getMessage());
     }
@@ -128,8 +135,12 @@ public class AdminServiceTest {
     // 4. Запрос существующего администратора без роли пользователя.
 
     try {
-      AssertionsForClassTypes.assertThat(
-          adminService.read(TE.UE_USER.getId()).getNameRoleList().size()).isEqualTo(1);
+      AdminInfo adminInfo = adminService.read(TE.UE_USER_ADMIN.getId());
+      AssertionsForClassTypes.assertThat(adminInfo.getId()).isEqualTo(TE.UE_USER_ADMIN.getId());
+      AssertionsForClassTypes.assertThat(adminInfo.getName()).isEqualTo(TE.UE_USER_ADMIN.getName());
+      AssertionsForClassTypes.assertThat(adminInfo.getEmail()).isEqualTo(TE.UE_USER_ADMIN.getEmail());
+      AssertionsForClassTypes.assertThat(adminInfo.getNameRoleList())
+          .isEqualTo(List.of(RDB.ROLE_ADMIN));
     } catch (NotFoundException e) {
       log.info(e.getMessage());
     }
