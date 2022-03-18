@@ -1,8 +1,8 @@
 package com.example.familybenefitstown.repositories;
 
 import com.example.familybenefitstown.FamilyBenefitsTownApplication;
-import com.example.familybenefitstown.res_part_rest_api.dto.entities.*;
-import com.example.familybenefitstown.res_part_rest_api.dto.repositories.*;
+import com.example.familybenefitstown.dto.entities.*;
+import com.example.familybenefitstown.dto.repositories.*;
 import com.example.familybenefitstown.resources.RDB;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;

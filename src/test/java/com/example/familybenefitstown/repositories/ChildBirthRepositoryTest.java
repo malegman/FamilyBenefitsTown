@@ -1,8 +1,8 @@
 package com.example.familybenefitstown.repositories;
 
 import com.example.familybenefitstown.FamilyBenefitsTownApplication;
-import com.example.familybenefitstown.res_part_rest_api.dto.entities.ChildBirthEntity;
-import com.example.familybenefitstown.res_part_rest_api.dto.repositories.ChildBirthRepository;
+import com.example.familybenefitstown.dto.entities.ChildBirthEntity;
+import com.example.familybenefitstown.dto.repositories.ChildBirthRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
