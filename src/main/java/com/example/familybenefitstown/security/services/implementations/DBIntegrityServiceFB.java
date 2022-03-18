@@ -23,7 +23,7 @@ public class DBIntegrityServiceFB implements DBIntegrityService {
   @Override
   public void checkExistenceById(Function<String, Boolean> existFunc, String id) throws NotFoundException {
 
-    if (!existFunc.apply(id)) {
+    if (id == null || !existFunc.apply(id)) {
       throw new NotFoundException(String.format(
           "Entity with ID \"%s\" not found in repository %s", id, existFunc.getClass().getName()));
     }
@@ -38,7 +38,7 @@ public class DBIntegrityServiceFB implements DBIntegrityService {
   @Override
   public void checkAbsenceByUniqStr(Function<String, Boolean> existFunc, String uniqueStr) throws AlreadyExistsException {
 
-    if (existFunc.apply(uniqueStr)) {
+    if (uniqueStr != null && existFunc.apply(uniqueStr)) {
       throw new AlreadyExistsException(String.format(
           "Entity with field \"%s\" already exists in repository %s", uniqueStr, existFunc.getClass().getName()));
     }
@@ -54,7 +54,7 @@ public class DBIntegrityServiceFB implements DBIntegrityService {
   @Override
   public void checkAbsenceAnotherByUniqStr(BiFunction<String, String, Boolean> existBiFunc, String idThis, String uniqueStr) throws AlreadyExistsException {
 
-    if (existBiFunc.apply(idThis, uniqueStr)) {
+    if (idThis != null && uniqueStr != null && existBiFunc.apply(idThis, uniqueStr)) {
       throw new AlreadyExistsException(String.format(
           "Entity with field \"%s\" already exists in repository %s", uniqueStr, existBiFunc.getClass().getName()));
     }
