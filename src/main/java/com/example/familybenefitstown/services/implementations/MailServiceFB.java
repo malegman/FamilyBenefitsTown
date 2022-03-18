@@ -47,7 +47,7 @@ public class MailServiceFB implements MailService {
   @Override
   public void checkEmailElseThrow(String email) throws InvalidEmailException {
 
-    if (!RMail.PATTERN_EMAIL.matcher(email).matches()) {
+    if (email == null || !RMail.PATTERN_EMAIL.matcher(email).matches()) {
       throw new InvalidEmailException(String.format(
           "Input value \"%s\" is not an email", email));
     }
