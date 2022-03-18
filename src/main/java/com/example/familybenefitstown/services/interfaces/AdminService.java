@@ -16,6 +16,7 @@ public interface AdminService {
    * Возвращает администратора по его ID
    * @param idAdmin ID администратора
    * @return информация об администраторе
+   * @throws NotFoundException если администратор с данным ID не найден
    */
   AdminInfo read(String idAdmin) throws NotFoundException;
 
