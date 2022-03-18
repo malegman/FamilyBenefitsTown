@@ -9,8 +9,6 @@ import com.example.familybenefitstown.dto.repositories.CityRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
-import com.example.familybenefitstown.resources.R;
-import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.services.interfaces.CityService;
 import lombok.extern.slf4j.Slf4j;
@@ -78,13 +76,11 @@ public class CityServiceFB implements CityService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter
-        .fromSave(citySave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, citySave, dbIntegrityService::preparePostgreSQLString);
 
     // Проверка отсутствия города по его названию
     dbIntegrityService.checkAbsenceByUniqStr(
         cityRepository::existsByName, cityEntityFromSave.getName());
-
-    cityEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
 
     cityRepository.save(cityEntityFromSave);
     log.info("DB. City with name \"{}\" created.", citySave.getName());
@@ -120,9 +116,9 @@ public class CityServiceFB implements CityService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter
-        .fromSave(citySave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(idCity, citySave, dbIntegrityService::preparePostgreSQLString);
 
-    String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
+    String prepareIdCity = cityEntityFromSave.getId();
 
     // Проверка существование города по его ID
     dbIntegrityService.checkExistenceById(
@@ -131,8 +127,6 @@ public class CityServiceFB implements CityService {
     // Проверка отсутствия города с отличным от данного ID и данным названием
     dbIntegrityService.checkAbsenceAnotherByUniqStr(
         cityRepository::existsByIdIsNotAndName, prepareIdCity, cityEntityFromSave.getName());
-
-    cityEntityFromSave.setId(prepareIdCity);
 
     cityRepository.save(cityEntityFromSave);
     log.info("DB. City with ID \"{}\" updated.", idCity);

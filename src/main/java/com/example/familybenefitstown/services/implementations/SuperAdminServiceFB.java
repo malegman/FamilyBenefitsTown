@@ -8,9 +8,7 @@ import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
-import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
-import com.example.familybenefitstown.security.generator.RandomValue;
 import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.services.interfaces.MailService;
 import com.example.familybenefitstown.services.interfaces.SuperAdminService;
@@ -71,13 +69,11 @@ public class SuperAdminServiceFB implements SuperAdminService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = AdminDBConverter
-        .fromSave(adminSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, adminSave, dbIntegrityService::preparePostgreSQLString);
 
     // Проверка на существование пользователя или администратора по email
     dbIntegrityService.checkAbsenceByUniqStr(
         userRepository::existsByEmail, userEntityFromSave.getEmail());
-
-    userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
 
     userRepository.save(userEntityFromSave);
     userRepository.addRoleToUser(userEntityFromSave.getId(), RDB.ID_ROLE_ADMIN);

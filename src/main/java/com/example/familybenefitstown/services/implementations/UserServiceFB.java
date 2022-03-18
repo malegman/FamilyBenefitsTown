@@ -119,7 +119,7 @@ public class UserServiceFB implements UserService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = UserDBConverter
-        .fromSave(userSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, userSave, dbIntegrityService::preparePostgreSQLString);
 
     // Проверка существования города по ID
     dbIntegrityService.checkExistenceById(
@@ -136,8 +136,6 @@ public class UserServiceFB implements UserService {
     // Проверка дат рождения пользователя и детей на предшествие текущей даты
     dateTimeService.checkDateBeforeNow(userEntityFromSave.getDateBirth());
     dateTimeService.checkDateBeforeNow(childBirthList);
-
-    userEntityFromSave.setId(RandomValue.randomString(R.ID_LENGTH));
 
     userRepository.save(userEntityFromSave);
     userRepository.addRoleToUser(userEntityFromSave.getId(), RDB.ID_ROLE_USER);
@@ -193,9 +191,9 @@ public class UserServiceFB implements UserService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = UserDBConverter
-        .fromSave(userSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(idUser, userSave, dbIntegrityService::preparePostgreSQLString);
 
-    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
+    String preparedIdUser = userEntityFromSave.getId();
 
     // Проверка существования города по ID
     dbIntegrityService.checkExistenceById(

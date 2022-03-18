@@ -65,7 +65,7 @@ public class AdminServiceFB implements AdminService {
    * Возвращает администратора об учреждении по его ID
    * @param idAdmin ID администратора
    * @return информация об администраторе
-   * @throws NotFoundException если администратор с данным ID не найдено
+   * @throws NotFoundException если администратор с данным ID не найден
    */
   @Override
   public AdminInfo read(String idAdmin) throws NotFoundException {
@@ -96,16 +96,15 @@ public class AdminServiceFB implements AdminService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = AdminDBConverter
-        .fromSave(adminSave, dbIntegrityService::preparePostgreSQLString);
-
-    String prepareIdAdmin = dbIntegrityService.preparePostgreSQLString(idAdmin);
+        .fromSave(idAdmin, adminSave, dbIntegrityService::preparePostgreSQLString);
+    String preparedIdAdmin = userEntityFromSave.getId();
 
     // Проверка отсутствия пользователя с отличным от данного ID и данным email
     dbIntegrityService.checkAbsenceAnotherByUniqStr(
-        userRepository::existsByIdIsNotAndEmail, prepareIdAdmin, userEntityFromSave.getEmail());
+        userRepository::existsByIdIsNotAndEmail, preparedIdAdmin, userEntityFromSave.getEmail());
 
     // Получение администратора по его ID, если администратора существует
-    UserEntity userEntityFromDB = userRepository.findById(prepareIdAdmin).orElseThrow(
+    UserEntity userEntityFromDB = userRepository.findById(preparedIdAdmin).orElseThrow(
         () -> new NotFoundException(String.format("Administrator with ID \"%s\" not found", userEntityFromSave.getId())));
 
     userEntityFromDB.setEmail(userEntityFromSave.getEmail());
