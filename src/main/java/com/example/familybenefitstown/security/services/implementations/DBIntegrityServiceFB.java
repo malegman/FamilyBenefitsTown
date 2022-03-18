@@ -1,8 +1,8 @@
 package com.example.familybenefitstown.security.services.implementations;
 
+import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
-import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
 import org.springframework.stereotype.Service;
 
 import java.util.function.BiFunction;

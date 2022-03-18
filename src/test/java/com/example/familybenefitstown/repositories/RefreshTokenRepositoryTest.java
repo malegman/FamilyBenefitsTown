@@ -1,10 +1,10 @@
 package com.example.familybenefitstown.repositories;
 
 import com.example.familybenefitstown.FamilyBenefitsTownApplication;
-import com.example.familybenefitstown.dto.entities.RefreshTokenEntity;
-import com.example.familybenefitstown.dto.entities.UserEntity;
-import com.example.familybenefitstown.dto.repositories.RefreshTokenRepository;
-import com.example.familybenefitstown.dto.repositories.UserRepository;
+import com.example.familybenefitstown.res_part_rest_api.dto.entities.RefreshTokenEntity;
+import com.example.familybenefitstown.res_part_rest_api.dto.entities.UserEntity;
+import com.example.familybenefitstown.res_part_rest_api.dto.repositories.RefreshTokenRepository;
+import com.example.familybenefitstown.res_part_rest_api.dto.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Test;
