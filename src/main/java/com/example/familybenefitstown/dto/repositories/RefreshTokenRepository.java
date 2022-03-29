@@ -12,6 +12,13 @@ import java.util.Optional;
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, String> {
 
   /**
+   * Проверяет наличие модели токена восстановления по его значению
+   * @param refreshToken значение токена восстановления
+   * @return true, если модель с указанным токеном существует
+   */
+  boolean existsByToken(String refreshToken);
+
+  /**
    * Возвращает модель токена восстановления
    * @param refreshToken токен восстановления
    * @return модель токена восстановления, или {@code empty}, если токен не найден
