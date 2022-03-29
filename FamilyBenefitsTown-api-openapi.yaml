@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Family Benefits Town
-  description: rest-api для приложения "Пособия для семьи с детьми", часть с городом
+  description: API сервиса "Пособия для семьи с детьми", часть с городом
   version: 1.0.0
   contact:
     email: smegovic@gmail.com
@@ -21,7 +21,7 @@ tags:
 
 
 paths:
-  /auth/pre-login:
+  /api/auth/pre-login:
     post:
       tags:
         - auth
@@ -45,7 +45,7 @@ paths:
           description: Пользователь с указанным email не найден
           content: { }
       security: [ ]
-  /auth/login:
+  /api/auth/login:
     post:
       tags:
         - auth
@@ -81,7 +81,7 @@ paths:
               schema:
                 description: Токен восстановления
                 type: string
-                example: refresh=ldkfj4h728fhd; httpOnly
+                example: refresh=ldkfj4h728fhd
           content:
             application/json:
               schema:
@@ -90,7 +90,7 @@ paths:
           description: Пользователь с указанными данными не найден
           content: { }
       security: [ ]
-  /auth/logout:
+  /api/auth/logout/{id}:
     post:
       tags:
         - auth
@@ -100,6 +100,14 @@ paths:
         О запросившем клиенте.
         Для администратора. Для пользователя.
         Необходима авторизация.
+      parameters:
+        - name: id
+          in: path
+          description: ID пользователя
+          schema:
+            type: string
+            example: td56387fhj
+          required: true
       responses:
         '200':
           description: Выход из системы выполнен
@@ -115,9 +123,10 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
 
 
-  /users:
+  /api/users:
     post:
       tags:
         - user
@@ -147,7 +156,7 @@ paths:
           description: Город или критерии с указанными ID не найдены
           content: { }
       security: [ ]
-  /users/{id}:
+  /api/users/{id}:
     get:
       tags:
         - user
@@ -183,6 +192,7 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
     put:
       tags:
         - user
@@ -233,6 +243,7 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
     delete:
       tags:
         - user
@@ -265,7 +276,8 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /users/init-data:
+        - apiKey: [ ]
+  /api/users/init-data:
     get:
       tags:
         - user
@@ -283,7 +295,7 @@ paths:
       security: [ ]
 
 
-  /admins/{id}:
+  /api/admins/{id}:
     get:
       tags:
         - admin
@@ -319,6 +331,7 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
     put:
       tags:
         - admin
@@ -364,9 +377,10 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
 
 
-  /sa/admins:
+  /api/sa/admins:
     post:
       tags:
         - super admin
@@ -400,10 +414,11 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /sa/admins/{id}:
+        - apiKey: [ ]
+  /api/sa/admins/{id}:
     delete:
       tags:
-        - admin
+        - super admin
       summary: Удаляет администратора по ID
       description:
         Удаляет администратора по ID.
@@ -435,7 +450,8 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /sa/from-user/{id}:
+        - apiKey: [ ]
+  /api/sa/from-user/{id}:
     post:
       tags:
         - super admin
@@ -470,7 +486,8 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /sa/to-user/{id}:
+        - apiKey: [ ]
+  /api/sa/to-user/{id}:
     post:
       tags:
         - super admin
@@ -505,7 +522,8 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /sa/to-super/{id}:
+        - apiKey: [ ]
+  /api/sa/to-super/{id}:
     post:
       tags:
         - super admin
@@ -540,9 +558,10 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
 
 
-  /cities:
+  /api/cities:
     get:
       tags:
         - city
@@ -592,7 +611,8 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
-  /cities/{id}:
+        - apiKey: [ ]
+  /api/cities/{id}:
     get:
       tags:
         - city
@@ -661,6 +681,7 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
     delete:
       tags:
         - city
@@ -692,6 +713,7 @@ paths:
           content: { }
       security:
         - bearerAuth: [ ]
+        - apiKey: [ ]
 
 
 components:
@@ -701,6 +723,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: cookie
+      name: refresh
 
   schemas:
     UserInfo:
