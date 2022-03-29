@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.security.services.interfaces;
+package com.example.familybenefitstown.security;
 
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
@@ -7,9 +7,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Интерфейс сервиса, отвечающего за целостность базы данных
+ * Предоставляет статические универсальные методы для безопасной работы с базой данных
  */
-public interface DBIntegrityService {
+public class DBSecuritySupport {
 
   /**
    * Проверяет существование в базе данных объекта по его ID
@@ -17,7 +17,13 @@ public interface DBIntegrityService {
    * @param id ID проверяемого объекта
    * @throws NotFoundException если объект не найден
    */
-  void checkExistenceById(Function<String, Boolean> existFunc, String id) throws NotFoundException;
+  public static void checkExistenceById(Function<String, Boolean> existFunc, String id) throws NotFoundException {
+
+    if (id == null || !existFunc.apply(id)) {
+      throw new NotFoundException(String.format(
+          "Entity with ID \"%s\" not found in repository %s", id, existFunc.getClass().getName()));
+    }
+  }
 
   /**
    * Проверяет отсутствие в базе данных объекта по его уникальному строковому полю
@@ -25,7 +31,13 @@ public interface DBIntegrityService {
    * @param uniqueStr уникальное строковое поле объекта
    * @throws AlreadyExistsException если объект найден
    */
-  void checkAbsenceByUniqStr(Function<String, Boolean> existFunc, String uniqueStr) throws AlreadyExistsException;
+  public static void checkAbsenceByUniqStr(Function<String, Boolean> existFunc, String uniqueStr) throws AlreadyExistsException {
+
+    if (uniqueStr != null && existFunc.apply(uniqueStr)) {
+      throw new AlreadyExistsException(String.format(
+          "Entity with field \"%s\" already exists in repository %s", uniqueStr, existFunc.getClass().getName()));
+    }
+  }
 
   /**
    * Проверяет отсутствие в базе данных объекта с отличным от данного ID с уникальным строковым полем
@@ -34,13 +46,26 @@ public interface DBIntegrityService {
    * @param uniqueStr уникальное строковое поле объекта
    * @throws AlreadyExistsException если объект с отличным ID и данным строковым полем найден
    */
-  void checkAbsenceAnotherByUniqStr(BiFunction<String, String, Boolean> existBiFunc, String idThis, String uniqueStr) throws AlreadyExistsException;
+  public static void checkAbsenceAnotherByUniqStr(BiFunction<String, String, Boolean> existBiFunc, String idThis, String uniqueStr) throws AlreadyExistsException {
+
+    if (idThis != null && uniqueStr != null && existBiFunc.apply(idThis, uniqueStr)) {
+      throw new AlreadyExistsException(String.format(
+          "Entity with field \"%s\" already exists in repository %s", uniqueStr, existBiFunc.getClass().getName()));
+    }
+  }
 
   /**
    * Подготавливает строку для вставки в SQL запрос, диалект PostgreSQL
    * @param content проверяемая строка
    * @return обработанная строка
    */
-  String preparePostgreSQLString(String content);
+  public static String preparePostgreSQLString(String content) {
+
+    if (content == null) {
+      return null;
+    }
+
+    return content.replace("'", "''");
+  }
 }
 

@@ -1,10 +1,8 @@
-package com.example.familybenefitstown.security.services.implementations;
+package com.example.familybenefitstown.security;
 
 import com.example.familybenefitstown.exceptions.DateFormatException;
 import com.example.familybenefitstown.exceptions.DateTimeException;
 import com.example.familybenefitstown.resources.R;
-import com.example.familybenefitstown.security.services.interfaces.DateTimeService;
-import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -14,18 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Реализация сервиса, который предоставляет методы для работы с датой и временем
+ * Предоставляет статические методы для упрощенной работы с датой и временем
  */
-@Service
-public class DateTimeServiceFB implements DateTimeService {
+public class DateTimeSupport {
 
   /**
    * Возвращает дату истечения срока жизни. Дата формируется из текущего времени и прибавленных секунд
    * @param expireSec число секунд, по окончанию которых истечет срок
    * @return дата истечения срока жизни
    */
-  @Override
-  public LocalDateTime getExpiration(long expireSec) {
+  public static LocalDateTime getExpiration(long expireSec) {
 
     return LocalDateTime.now().plusSeconds(expireSec);
   }
@@ -36,8 +32,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @return преобразованная строка в формат даты
    * @throws DateFormatException если полученная строка не соответствует формату "dd.mm.yyyy"
    */
-  @Override
-  public LocalDate strToDate(String userBirth) throws DateFormatException {
+  public static LocalDate strToDate(String userBirth) throws DateFormatException {
 
     try {
       return LocalDate.from((TemporalAccessor) R.SIMPLE_DATE_FORMAT.parse(userBirth));
@@ -54,8 +49,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @return преобразованная строка в формат даты
    * @throws DateFormatException если одна из полученных строк не соответствует формату "dd.mm.yyyy"
    */
-  @Override
-  public List<LocalDate> strToDate(List<String> userBirthList) throws DateFormatException {
+  public static List<LocalDate> strToDate(List<String> userBirthList) throws DateFormatException {
 
     List<LocalDate> localDateList = new ArrayList<>(userBirthList.size());
     for (String userBirth : userBirthList) {
@@ -70,8 +64,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @param dateCheck проверяемая дата
    * @throws DateTimeException если проверяемая дата позже текущей даты
    */
-  @Override
-  public void checkDateBeforeNow(LocalDate dateCheck) throws DateTimeException {
+  public static void checkDateBeforeNow(LocalDate dateCheck) throws DateTimeException {
 
     LocalDate dateCurrent = LocalDate.now();
     if (dateCheck.isAfter(dateCurrent)) {
@@ -85,8 +78,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @param dateList множество проверяемых дат
    * @throws DateTimeException если проверяемая дата позже текущей даты
    */
-  @Override
-  public void checkDateBeforeNow(List<LocalDate> dateList) throws DateTimeException {
+  public static void checkDateBeforeNow(List<LocalDate> dateList) throws DateTimeException {
 
     for (LocalDate date : dateList) {
       checkDateBeforeNow(date);
@@ -98,8 +90,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @param dateTimeCheck проверяемое время
    * @throws DateTimeException если текущее время позже проверяемого
    */
-  @Override
-  public void checkDateTimeAfterNow(LocalDateTime dateTimeCheck) throws DateTimeException {
+  public static void checkDateTimeAfterNow(LocalDateTime dateTimeCheck) throws DateTimeException {
 
     LocalDateTime dateTimeCurrent = LocalDateTime.now();
     if (dateTimeCurrent.isAfter(dateTimeCheck)) {
@@ -114,8 +105,7 @@ public class DateTimeServiceFB implements DateTimeService {
    * @param dateCheck проверяемая дата
    * @throws DateTimeException если день рождения был после проверяемой даты
    */
-  @Override
-  public void checkBirthdayBefore(LocalDate dateBirth, LocalDate dateCheck) throws DateTimeException {
+  public static void checkBirthdayBefore(LocalDate dateBirth, LocalDate dateCheck) throws DateTimeException {
 
     if (dateBirth.plusYears(LocalDate.now().getYear() - dateBirth.getYear()).isAfter(dateCheck)) {
       throw new DateTimeException(String.format(
