@@ -6,7 +6,7 @@ import com.example.familybenefitstown.part_res_rest_api.api_models.common.Object
 import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.resources.R;
-import com.example.familybenefitstown.security.generator.RandomValue;
+import com.example.familybenefitstown.security.RandomValue;
 
 import java.util.function.Function;
 

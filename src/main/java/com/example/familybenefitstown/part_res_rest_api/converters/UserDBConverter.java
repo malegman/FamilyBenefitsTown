@@ -7,7 +7,7 @@ import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.dto.entities.UserEntity;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.resources.R;
-import com.example.familybenefitstown.security.generator.RandomValue;
+import com.example.familybenefitstown.security.RandomValue;
 
 import java.util.List;
 import java.util.function.Function;

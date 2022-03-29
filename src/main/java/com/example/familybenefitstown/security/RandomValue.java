@@ -1,4 +1,4 @@
-package com.example.familybenefitstown.security.generator;
+package com.example.familybenefitstown.security;
 
 import java.security.SecureRandom;
 
