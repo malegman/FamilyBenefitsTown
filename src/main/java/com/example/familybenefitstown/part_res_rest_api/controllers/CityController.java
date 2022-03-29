@@ -39,7 +39,7 @@ public class CityController {
   }
 
   /**
-   * Обрабатывает GET запрос "/cities/all" на получение множества городов,
+   * Обрабатывает GET запрос "/api/cities/all" на получение множества городов,
    * в которых есть учреждения и пособия.
    * Фильтр по названию или ID пособия.
    * Выполнить запрос может любой клиент
@@ -48,38 +48,38 @@ public class CityController {
    * @return множество городов, если запрос выполнен успешно, и код ответа
    */
   @GetMapping(
-      value = "/cities",
+      value = "/api/cities",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<Set<ObjectShortInfo>> readAllFilter(@RequestParam(name = "name", required = false) String name,
                                                             HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/cities?name={}\": Request in controller", requestAddress, name);
+    log.debug("{} GET \"/api/cities?name={}\": Request in controller", requestAddress, name);
 
     Set<ObjectShortInfo> cityShortInfoSet = cityService.readAllFilter(name);
     return ResponseEntity.status(HttpStatus.OK).body(cityShortInfoSet);
   }
 
   /**
-   * Обрабатывает POST запрос "/cities" на создание города.
+   * Обрабатывает POST запрос "/api/cities" на создание города.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_ADMIN"
    * @param citySave объект запроса для сохранения города
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @PostMapping(
-      value = "/cities",
+      value = "/api/cities",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> create(@RequestBody CitySave citySave,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} POST \"/cities\": Request in controller", requestAddress);
+    log.debug("{} POST \"/api/cities\": Request in controller", requestAddress);
 
     // Если тело запроса пустое
     if (citySave == null) {
-      log.warn("{} POST \"/cities\": Request body \"citySave\" is empty", requestAddress);
+      log.warn("{} POST \"/api/cities\": Request body \"citySave\" is empty", requestAddress);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
@@ -90,32 +90,32 @@ public class CityController {
     } catch (AlreadyExistsException | InvalidStringException e) {
       // Город с указанным названием существует.
       // Некорректное строковое поле объекта запроса.
-      log.warn("{} POST \"/cities\": {}", requestAddress, e.getMessage());
+      log.warn("{} POST \"/api/cities\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
     } catch (NotFoundException e) {
       // Не найдены пособия
-      log.warn("{} POST \"/cities\": {}", requestAddress, e.getMessage());
+      log.warn("{} POST \"/api/cities\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
   /**
-   * Обрабатывает GET запрос "/cities/{id}" на получение информации о городе.
+   * Обрабатывает GET запрос "/api/cities/{id}" на получение информации о городе.
    * Выполнить запрос может любой клиент
    * @param idCity ID города
    * @param request http запрос
    * @return информация о городе, если запрос выполнен успешно, и код ответа
    */
   @GetMapping(
-      value = "/cities/{id}",
+      value = "/api/cities/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<CityInfo> read(@PathVariable(name = "id") String idCity,
                                        HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/cities/{}\": Request in controller", requestAddress, idCity);
+    log.debug("{} GET \"/api/cities/{}\": Request in controller", requestAddress, idCity);
 
     try {
       CityInfo cityInfo = cityService.read(idCity);
@@ -123,13 +123,13 @@ public class CityController {
 
     } catch (NotFoundException e) {
       // Не найден город
-      log.warn("{} GET \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
+      log.warn("{} GET \"/api/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
   /**
-   * Обрабатывает PUT запрос "/cities/{id}" на обновление города.
+   * Обрабатывает PUT запрос "/api/cities/{id}" на обновление города.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_ADMIN"
    * @param idCity ID города
    * @param citySave объект запроса для сохранения города
@@ -137,18 +137,18 @@ public class CityController {
    * @return код ответа, результат обработки запроса
    */
   @PutMapping(
-      value = "/cities/{id}",
+      value = "/api/cities/{id}",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> update(@PathVariable(name = "id") String idCity,
                                   @RequestBody CitySave citySave,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} PUT \"/cities/{}\": Request in controller", requestAddress, idCity);
+    log.debug("{} PUT \"/api/cities/{}\": Request in controller", requestAddress, idCity);
 
     // Если тело запроса пустое
     if (citySave == null) {
-      log.warn("{} PUT \"/cities/{}\": Request body \"citySave\" is empty", requestAddress, idCity);
+      log.warn("{} PUT \"/api/cities/{}\": Request body \"citySave\" is empty", requestAddress, idCity);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
@@ -158,31 +158,31 @@ public class CityController {
 
     } catch (NotFoundException e) {
       // Не найден город или не найдены пособия
-      log.warn("{} PUT \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
+      log.warn("{} PUT \"/api/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     } catch (AlreadyExistsException | InvalidStringException e) {
       // Город с отличным ID и данным названием уже существует.
       // Некорректное строковое поле объекта запроса.
-      log.warn("{} PUT \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
+      log.warn("{} PUT \"/api/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
   /**
-   * Обрабатывает DELETE запрос "/cities/{id}" на удаление городе.
+   * Обрабатывает DELETE запрос "/api/cities/{id}" на удаление городе.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_ADMIN"
    * @param idCity ID города
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @DeleteMapping(
-      value = "/cities/{id}")
+      value = "/api/cities/{id}")
   public ResponseEntity<?> delete(@PathVariable(name = "id") String idCity,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} DELETE \"/cities/{}\": Request in controller", requestAddress, idCity);
+    log.debug("{} DELETE \"/api/cities/{}\": Request in controller", requestAddress, idCity);
 
     try {
       cityService.delete(idCity);
@@ -190,7 +190,7 @@ public class CityController {
 
     } catch (NotFoundException e) {
       // Не найден город
-      log.warn("{} DELETE \"/cities/{}\": {}", requestAddress, idCity, e.getMessage());
+      log.warn("{} DELETE \"/api/cities/{}\": {}", requestAddress, idCity, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }

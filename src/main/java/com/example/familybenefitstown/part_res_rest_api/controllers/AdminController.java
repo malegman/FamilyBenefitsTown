@@ -38,7 +38,7 @@ public class AdminController {
   }
 
   /**
-   * Обрабатывает GET запрос "/admins/{id}" на получение информации об администраторе.
+   * Обрабатывает GET запрос "/api/admins/{id}" на получение информации об администраторе.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_ADMIN".
    * Администратор может получить информацию только о своем профиле.
    * @param idAdmin ID администратора
@@ -46,14 +46,14 @@ public class AdminController {
    * @return информация об администраторе, если запрос выполнен успешно, и код ответа
    */
   @GetMapping(
-      value = "/admins/{id}",
+      value = "/api/admins/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<AdminInfo> read(@PathVariable(name = "id") String idAdmin,
                                         HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/admins/{}\": Request in controller", requestAddress, idAdmin);
+    log.debug("{} GET \"/api/admins/{}\": Request in controller", requestAddress, idAdmin);
 
     try {
       AdminInfo adminInfo = adminService.read(idAdmin);
@@ -61,13 +61,13 @@ public class AdminController {
 
     } catch (NotFoundException e) {
       // Не найден администратор
-      log.warn("{} GET \"/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
+      log.warn("{} GET \"/api/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
   /**
-   * Обрабатывает PUT запрос "/admins/{id}" на обновление администратора.
+   * Обрабатывает PUT запрос "/api/admins/{id}" на обновление администратора.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_ADMIN".
    * Администратор может обновить только свой профиль.
    * @param idAdmin ID администратора
@@ -76,18 +76,18 @@ public class AdminController {
    * @return код ответа, результат обработки запроса
    */
   @PutMapping(
-      value = "/admins/{id}",
+      value = "/api/admins/{id}",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> update(@PathVariable(name = "id") String idAdmin,
                                   @RequestBody AdminSave adminSave,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} POST \"/admins/{}\": Request in controller", requestAddress, idAdmin);
+    log.debug("{} POST \"/api/admins/{}\": Request in controller", requestAddress, idAdmin);
 
     // Если тело запроса пустое
     if (adminSave == null) {
-      log.warn("{} PUT \"/admins/{}\": Request body \"adminSave\" is empty", requestAddress, idAdmin);
+      log.warn("{} PUT \"/api/admins/{}\": Request body \"adminSave\" is empty", requestAddress, idAdmin);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
@@ -97,14 +97,14 @@ public class AdminController {
 
     } catch (NotFoundException e) {
       // Не найден администратор
-      log.warn("{} PUT \"/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
+      log.warn("{} PUT \"/api/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     } catch (InvalidEmailException | AlreadyExistsException | InvalidStringException e) {
       // Строка в поле "email" не является email.
       // Администратор или пользователь с отличным ID и данным email уже существует.
       // Некорректное строковое поле объекта запроса.
-      log.warn("{} PUT \"/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
+      log.warn("{} PUT \"/api/admins/{}\": {}", requestAddress, idAdmin, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }

@@ -36,24 +36,24 @@ public class UserController {
   }
 
   /**
-   * Обрабатывает POST запрос "/users" на создание пользователя. Регистрация гостя
+   * Обрабатывает POST запрос "/api/users" на создание пользователя. Регистрация гостя
    * Для незарегистрированного клиента.
    * @param userSave объект запроса для сохранения пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @PostMapping(
-      value = "/users",
+      value = "/api/users",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> create(@RequestBody UserSave userSave,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} POST \"/users\": Request in controller", requestAddress);
+    log.debug("{} POST \"/api/users\": Request in controller", requestAddress);
 
     // Если тело запроса пустое
     if (userSave == null) {
-      log.warn("{} POST \"/users\": Request body \"userSave\" is empty", requestAddress);
+      log.warn("{} POST \"/api/users\": Request body \"userSave\" is empty", requestAddress);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
@@ -63,7 +63,7 @@ public class UserController {
 
     } catch (NotFoundException e) {
       // Не найдены критерии или город
-      log.warn("{} POST \"/users\": {}", requestAddress, e.getMessage());
+      log.warn("{} POST \"/api/users\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     } catch (AlreadyExistsException | InvalidEmailException | DateTimeException | DateFormatException | InvalidStringException e) {
@@ -72,27 +72,27 @@ public class UserController {
       // Даты позже текущей даты.
       // Даты не соответствуют формату "dd.mm.yyyy".
       // Некорректное строковое поле объекта запроса.
-      log.warn("{} POST \"/users\": {}", requestAddress, e.getMessage());
+      log.warn("{} POST \"/api/users\": {}", requestAddress, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
   /**
-   * Обрабатывает GET запрос "/users/{id}" на получение информации о пользователе.
+   * Обрабатывает GET запрос "/api/users/{id}" на получение информации о пользователе.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
    * @param request http запрос
    * @return информация о пользователе, если запрос выполнен успешно, и код ответа
    */
   @GetMapping(
-      value = "/users/{id}",
+      value = "/api/users/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<UserInfo> read(@PathVariable(name = "id") String idUser,
                                        HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/users/{}\": Request in controller", requestAddress, idUser);
+    log.debug("{} GET \"/api/users/{}\": Request in controller", requestAddress, idUser);
 
     try {
       UserInfo userInfo = userService.read(idUser);
@@ -100,13 +100,13 @@ public class UserController {
 
     } catch (NotFoundException e) {
       // Не найден пользователь
-      log.error("{} GET \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
+      log.error("{} GET \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
   /**
-   * Обрабатывает PUT запрос "/users/{id}" на обновление пользователя.
+   * Обрабатывает PUT запрос "/api/users/{id}" на обновление пользователя.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
    * @param userSave объект запроса для сохранения пользователя
@@ -114,18 +114,18 @@ public class UserController {
    * @return код ответа, результат обработки запроса
    */
   @PutMapping(
-      value = "/users/{id}",
+      value = "/api/users/{id}",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   public ResponseEntity<?> update(@PathVariable(name = "id") String idUser,
                                   @RequestBody UserSave userSave,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} PUT \"/users/{}\": Request in controller", requestAddress, idUser);
+    log.debug("{} PUT \"/api/users/{}\": Request in controller", requestAddress, idUser);
 
     // Если тело запроса пустое
     if (userSave == null) {
-      log.warn("{} PUT \"/users/{}\": Request body \"userSave\" is empty", requestAddress, idUser);
+      log.warn("{} PUT \"/api/users/{}\": Request body \"userSave\" is empty", requestAddress, idUser);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
@@ -135,7 +135,7 @@ public class UserController {
 
     } catch (NotFoundException e) {
       // Не найден пользователь или не найдены критерии или город
-      log.warn("{} PUT \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
+      log.warn("{} PUT \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     } catch (InvalidEmailException | DateTimeException | DateFormatException | AlreadyExistsException | InvalidStringException e) {
@@ -144,25 +144,25 @@ public class UserController {
       // Даты не соответствуют формату "dd.mm.yyyy".
       // Пользователь с отличным ID и данным email уже существует.
       // Некорректное строковое поле объекта запроса.
-      log.warn("{} PUT \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
+      log.warn("{} PUT \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
   /**
-   * Обрабатывает DELETE запрос "/users/{id}" на удаление пользователя.
+   * Обрабатывает DELETE запрос "/api/users/{id}" на удаление пользователя.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
    * @param request http запрос
    * @return код ответа, результат обработки запроса
    */
   @DeleteMapping(
-      value = "/users/{id}")
+      value = "/api/users/{id}")
   public ResponseEntity<?> delete(@PathVariable(name = "id") String idUser,
                                   HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} DELETE \"/users/{}\": Request in controller", requestAddress, idUser);
+    log.debug("{} DELETE \"/api/users/{}\": Request in controller", requestAddress, idUser);
 
     try {
       userService.delete(idUser);
@@ -170,26 +170,26 @@ public class UserController {
 
     } catch (NotFoundException e) {
       // Не найден пользователь
-      log.warn("{} DELETE \"/users/{}\": {}", requestAddress, idUser, e.getMessage());
+      log.warn("{} DELETE \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
   /**
-   * Обрабатывает GET запрос "/users/init-data" на получение дополнительных данных для пользователя.
+   * Обрабатывает GET запрос "/api/users/init-data" на получение дополнительных данных для пользователя.
    * Данные содержат в себе множества кратких информаций о городах и полных критериях.
    * Выполнить запрос может любой клиент
    * @param request http запрос
    * @return дополнительные данные для пользователя и код ответа
    */
   @GetMapping(
-      value = "/users/init-data",
+      value = "/api/users/init-data",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
   public ResponseEntity<UserInitData> getInitData(HttpServletRequest request) {
 
     String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/users/init-data\": Request in controller", requestAddress);
+    log.debug("{} GET \"/api/users/init-data\": Request in controller", requestAddress);
 
     return ResponseEntity
         .status(HttpStatus.OK)
