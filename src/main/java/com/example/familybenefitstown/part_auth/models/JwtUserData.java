@@ -1,12 +1,11 @@
 package com.example.familybenefitstown.part_auth.models;
 
+import com.example.familybenefitstown.dto.entities.RoleEntity;
 import com.example.familybenefitstown.resources.R;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +22,28 @@ public class JwtUserData {
   private String idUser;
 
   /**
-   * Множество названий ролей пользователя
+   * Список названий ролей пользователя
    */
-  private Set<String> nameRoleSet;
+  private List<String> nameRoleList;
+
+  /**
+   * Проверяет наличие роли в пользовательских данных из списка ролей
+   * @param roleEntityList список моделей роли
+   * @return true, если пользовательские данные содержат роль
+   */
+  public boolean hasRole(List<RoleEntity> roleEntityList) {
+
+    boolean containsRole = false;
+
+    for (RoleEntity roleEntity : roleEntityList) {
+      containsRole = nameRoleList.contains(roleEntity.getName());
+      if (containsRole) {
+        break;
+      }
+    }
+
+    return containsRole;
+  }
 
   /**
    * Преобразует строку в объект данных авторизации в jwt
@@ -45,13 +63,13 @@ public class JwtUserData {
     return JwtUserData
         .builder()
         .idUser(matcherData.group("id"))
-        .nameRoleSet(new HashSet<>(List.of(matcherData.group("roles").split(","))))
+        .nameRoleList(List.of(matcherData.group("roles").split(",")))
         .build();
   }
 
   @Override
   public String toString() {
 
-    return String.format("id=%sroles=%s", idUser, String.join(",", nameRoleSet));
+    return String.format("id=%sroles=%s", idUser, String.join(",", nameRoleList));
   }
 }
