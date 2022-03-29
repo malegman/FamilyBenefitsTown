@@ -1,7 +1,6 @@
 package com.example.familybenefitstown.part_res_rest_api.services.implementations;
 
 import com.example.familybenefitstown.exceptions.*;
-import com.example.familybenefitstown.part_auth.services.interfaces.MailService;
 import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserInfo;
 import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserInitData;
 import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserSave;
@@ -17,9 +16,10 @@ import com.example.familybenefitstown.dto.repositories.UserRepository;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.UserService;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
-import com.example.familybenefitstown.security.generator.RandomValue;
-import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
-import com.example.familybenefitstown.security.services.interfaces.DateTimeService;
+import com.example.familybenefitstown.security.RandomValue;
+import com.example.familybenefitstown.security.DBSecuritySupport;
+import com.example.familybenefitstown.security.DateTimeSupport;
+import com.example.familybenefitstown.security.MailSecuritySupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,44 +56,21 @@ public class UserServiceFB implements UserService {
   private final CityRepository cityRepository;
 
   /**
-   * Интерфейс сервиса, который предоставляет методы для работы с датой и временем
-   */
-  private final DateTimeService dateTimeService;
-
-  /**
-   * Интерфейс сервиса, отвечающего за целостность базы данных
-   */
-  private final DBIntegrityService dbIntegrityService;
-  /**
-   * Интерфейс сервиса для отправки сообщений на электронную почту
-   */
-  private final MailService mailService;
-
-  /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
    * @param childBirthRepository репозиторий, работающий с моделью таблицы "child"
    * @param roleRepository репозиторий, работающий с моделью таблицы "role"
    * @param cityRepository репозиторий, работающий с моделью таблицы "city"
-   * @param dateTimeService интерфейс сервиса, который предоставляет методы для работы с датой и временем
-   * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
-   * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public UserServiceFB(UserRepository userRepository,
                        ChildBirthRepository childBirthRepository,
                        RoleRepository roleRepository,
-                       CityRepository cityRepository,
-                       DateTimeService dateTimeService,
-                       DBIntegrityService dbIntegrityService,
-                       MailService mailService) {
+                       CityRepository cityRepository) {
     this.userRepository = userRepository;
     this.childBirthRepository = childBirthRepository;
     this.roleRepository = roleRepository;
     this.cityRepository = cityRepository;
-    this.dateTimeService = dateTimeService;
-    this.dbIntegrityService = dbIntegrityService;
-    this.mailService = mailService;
   }
 
   /**
@@ -117,27 +94,27 @@ public class UserServiceFB implements UserService {
       InvalidStringException {
 
     // Проверка строки email на соответствие формату email
-    mailService.checkEmailElseThrow(userSave.getEmail());
+    MailSecuritySupport.checkEmailElseThrow(userSave.getEmail());
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = UserDBConverter
-        .fromSave(null, userSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, userSave, DBSecuritySupport::preparePostgreSQLString);
 
     // Проверка существования города по ID
-    dbIntegrityService.checkExistenceById(
+    DBSecuritySupport.checkExistenceById(
         cityRepository::existsById, userEntityFromSave.getIdCity());
 
     // Проверка на отсутствие пользователя или администратора по email
-    dbIntegrityService.checkAbsenceByUniqStr(
+    DBSecuritySupport.checkAbsenceByUniqStr(
         userRepository::existsByEmail, userEntityFromSave.getEmail());
 
     // Преобразование дат рождения пользователя и рождения детей
-    userEntityFromSave.setDateBirth(dateTimeService.strToDate(userSave.getDateBirth()));
-    List<LocalDate> childBirthList = dateTimeService.strToDate(userSave.getBirthDateChildren());
+    userEntityFromSave.setDateBirth(DateTimeSupport.strToDate(userSave.getDateBirth()));
+    List<LocalDate> childBirthList = DateTimeSupport.strToDate(userSave.getBirthDateChildren());
 
     // Проверка дат рождения пользователя и детей на предшествие текущей даты
-    dateTimeService.checkDateBeforeNow(userEntityFromSave.getDateBirth());
-    dateTimeService.checkDateBeforeNow(childBirthList);
+    DateTimeSupport.checkDateBeforeNow(userEntityFromSave.getDateBirth());
+    DateTimeSupport.checkDateBeforeNow(childBirthList);
 
     userRepository.save(userEntityFromSave);
     userRepository.addRoleToUser(userEntityFromSave.getId(), RDB.ID_ROLE_USER);
@@ -157,7 +134,7 @@ public class UserServiceFB implements UserService {
   public UserInfo read(String idUser) throws NotFoundException {
 
     // Получение пользователя по его ID, если пользователь существует
-    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
+    String preparedIdUser = DBSecuritySupport.preparePostgreSQLString(idUser);
     UserEntity userEntityFromRequest = getUserEntity(preparedIdUser);
 
     return UserDBConverter.toInfo(userEntityFromRequest,
@@ -189,32 +166,32 @@ public class UserServiceFB implements UserService {
       InvalidStringException {
 
     // Проверка строки email на соответствие формату email
-    mailService.checkEmailElseThrow(userSave.getEmail());
+    MailSecuritySupport.checkEmailElseThrow(userSave.getEmail());
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = UserDBConverter
-        .fromSave(idUser, userSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(idUser, userSave, DBSecuritySupport::preparePostgreSQLString);
 
     String preparedIdUser = userEntityFromSave.getId();
 
     // Проверка существования города по ID
-    dbIntegrityService.checkExistenceById(
+    DBSecuritySupport.checkExistenceById(
         cityRepository::existsById, userEntityFromSave.getIdCity());
 
     // Проверка отсутствия пользователя с отличным от данного ID и данным email
-    dbIntegrityService.checkAbsenceAnotherByUniqStr(
+    DBSecuritySupport.checkAbsenceAnotherByUniqStr(
         userRepository::existsByIdIsNotAndEmail, preparedIdUser, userEntityFromSave.getEmail());
 
     // Получение пользователя по его ID, если пользователь существует
     UserEntity userEntityFromDB = getUserEntity(preparedIdUser);
 
     // Преобразование дат рождения пользователя и рождения детей
-    userEntityFromDB.setDateBirth(dateTimeService.strToDate(userSave.getDateBirth()));
-    List<LocalDate> childBirthList = dateTimeService.strToDate(userSave.getBirthDateChildren());
+    userEntityFromDB.setDateBirth(DateTimeSupport.strToDate(userSave.getDateBirth()));
+    List<LocalDate> childBirthList = DateTimeSupport.strToDate(userSave.getBirthDateChildren());
 
     // Проверка дат рождения пользователя и детей на предшествие текущей даты
-    dateTimeService.checkDateBeforeNow(userEntityFromDB.getDateBirth());
-    dateTimeService.checkDateBeforeNow(childBirthList);
+    DateTimeSupport.checkDateBeforeNow(userEntityFromDB.getDateBirth());
+    DateTimeSupport.checkDateBeforeNow(childBirthList);
 
     userEntityFromDB.setEmail(userEntityFromSave.getEmail());
     userEntityFromDB.setName(userEntityFromSave.getName());
@@ -235,8 +212,8 @@ public class UserServiceFB implements UserService {
   public void delete(String idUser) throws NotFoundException {
 
     // Проверка существования пользователя по ID
-    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdUser);
+    String preparedIdUser = DBSecuritySupport.preparePostgreSQLString(idUser);
+    DBSecuritySupport.checkExistenceById(userRepository::existsById, preparedIdUser);
 
     // Если есть роль "ROLE_ADMIN", удаление роли "ROLE_USER", иначе удаление пользователя и его токена восстановления
     if (userRepository.hasUserRole(preparedIdUser, RDB.ID_ROLE_ADMIN)) {
@@ -273,7 +250,7 @@ public class UserServiceFB implements UserService {
   @Override
   public boolean existsByEmail(String email) {
 
-    String prepareEmail = dbIntegrityService.preparePostgreSQLString(email);
+    String prepareEmail = DBSecuritySupport.preparePostgreSQLString(email);
     return userRepository.existsByEmail(prepareEmail);
   }
 

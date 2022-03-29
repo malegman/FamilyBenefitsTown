@@ -9,9 +9,9 @@ import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.resources.RDB;
-import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
-import com.example.familybenefitstown.part_auth.services.interfaces.MailService;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.SuperAdminService;
+import com.example.familybenefitstown.security.DBSecuritySupport;
+import com.example.familybenefitstown.security.MailSecuritySupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,27 +30,12 @@ public class SuperAdminServiceFB implements SuperAdminService {
   private final UserRepository userRepository;
 
   /**
-   * Интерфейс сервиса, отвечающего за целостность базы данных
-   */
-  private final DBIntegrityService dbIntegrityService;
-  /**
-   * Интерфейс сервиса для отправки сообщений на электронную почту
-   */
-  private final MailService mailService;
-
-  /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
-   * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
-   * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
-  public SuperAdminServiceFB(UserRepository userRepository,
-                             DBIntegrityService dbIntegrityService,
-                             MailService mailService) {
+  public SuperAdminServiceFB(UserRepository userRepository) {
     this.userRepository = userRepository;
-    this.dbIntegrityService = dbIntegrityService;
-    this.mailService = mailService;
   }
 
   /**
@@ -65,14 +50,14 @@ public class SuperAdminServiceFB implements SuperAdminService {
   public void create(AdminSave adminSave) throws AlreadyExistsException, InvalidEmailException, InvalidStringException {
 
     // Проверка строки email на соответствие формату email
-    mailService.checkEmailElseThrow(adminSave.getEmail());
+    MailSecuritySupport.checkEmailElseThrow(adminSave.getEmail());
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = AdminDBConverter
-        .fromSave(null, adminSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, adminSave, DBSecuritySupport::preparePostgreSQLString);
 
     // Проверка на существование пользователя или администратора по email
-    dbIntegrityService.checkAbsenceByUniqStr(
+    DBSecuritySupport.checkAbsenceByUniqStr(
         userRepository::existsByEmail, userEntityFromSave.getEmail());
 
     userRepository.save(userEntityFromSave);
@@ -90,8 +75,8 @@ public class SuperAdminServiceFB implements SuperAdminService {
   public void delete(String idAdmin) throws NotFoundException {
 
     // Проверка на существование пользователя или администратора по ID
-    String preparedIdAdmin = dbIntegrityService.preparePostgreSQLString(idAdmin);
-    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdAdmin);
+    String preparedIdAdmin = DBSecuritySupport.preparePostgreSQLString(idAdmin);
+    DBSecuritySupport.checkExistenceById(userRepository::existsById, preparedIdAdmin);
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     checkHasRoleElseThrowNotFound(preparedIdAdmin, RDB.ID_ROLE_ADMIN);
@@ -117,8 +102,8 @@ public class SuperAdminServiceFB implements SuperAdminService {
   public void fromUser(String idUser) throws NotFoundException, AlreadyExistsException {
 
     // Проверка существования пользователя по ID
-    String preparedIdUser = dbIntegrityService.preparePostgreSQLString(idUser);
-    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdUser);
+    String preparedIdUser = DBSecuritySupport.preparePostgreSQLString(idUser);
+    DBSecuritySupport.checkExistenceById(userRepository::existsById, preparedIdUser);
 
     // Проверка наличия роли "ROLE_USER" у пользователя
     checkHasRoleElseThrowNotFound(preparedIdUser, RDB.ID_ROLE_USER);
@@ -140,8 +125,8 @@ public class SuperAdminServiceFB implements SuperAdminService {
   public void toUser(String idAdmin) throws NotFoundException, AlreadyExistsException {
 
     // Проверка существования пользователя по ID
-    String preparedIdAdmin = dbIntegrityService.preparePostgreSQLString(idAdmin);
-    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdAdmin);
+    String preparedIdAdmin = DBSecuritySupport.preparePostgreSQLString(idAdmin);
+    DBSecuritySupport.checkExistenceById(userRepository::existsById, preparedIdAdmin);
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     checkHasRoleElseThrowNotFound(preparedIdAdmin, RDB.ID_ROLE_ADMIN);
@@ -162,8 +147,8 @@ public class SuperAdminServiceFB implements SuperAdminService {
   public void toSuper(String idAdmin) throws NotFoundException {
 
     // Проверка существования пользователя по ID
-    String preparedIdAdmin = dbIntegrityService.preparePostgreSQLString(idAdmin);
-    dbIntegrityService.checkExistenceById(userRepository::existsById, preparedIdAdmin);
+    String preparedIdAdmin = DBSecuritySupport.preparePostgreSQLString(idAdmin);
+    DBSecuritySupport.checkExistenceById(userRepository::existsById, preparedIdAdmin);
 
     // Проверка наличия роли "ROLE_ADMIN" у пользователя
     checkHasRoleElseThrowNotFound(preparedIdAdmin, RDB.ID_ROLE_ADMIN);

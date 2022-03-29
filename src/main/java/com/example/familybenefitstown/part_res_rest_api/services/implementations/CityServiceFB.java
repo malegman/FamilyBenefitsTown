@@ -10,7 +10,7 @@ import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.CityService;
-import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
+import com.example.familybenefitstown.security.DBSecuritySupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,20 +31,12 @@ public class CityServiceFB implements CityService {
   private final CityRepository cityRepository;
 
   /**
-   * Интерфейс сервиса, отвечающего за целостность базы данных
-   */
-  private final DBIntegrityService dbIntegrityService;
-
-  /**
    * Конструктор для инициализации интерфейсов репозиториев и сервиса
    * @param cityRepository репозиторий, работающий с моделью таблицы "city"
-   * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
    */
   @Autowired
-  public CityServiceFB(CityRepository cityRepository,
-                       DBIntegrityService dbIntegrityService) {
+  public CityServiceFB(CityRepository cityRepository) {
     this.cityRepository = cityRepository;
-    this.dbIntegrityService = dbIntegrityService;
   }
 
   /**
@@ -76,10 +68,10 @@ public class CityServiceFB implements CityService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter
-        .fromSave(null, citySave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(null, citySave, DBSecuritySupport::preparePostgreSQLString);
 
     // Проверка отсутствия города по его названию
-    dbIntegrityService.checkAbsenceByUniqStr(
+    DBSecuritySupport.checkAbsenceByUniqStr(
         cityRepository::existsByName, cityEntityFromSave.getName());
 
     cityRepository.save(cityEntityFromSave);
@@ -96,7 +88,7 @@ public class CityServiceFB implements CityService {
   public CityInfo read(String idCity) throws NotFoundException {
 
     // Получение города по его ID, если город существует
-    String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
+    String prepareIdCity = DBSecuritySupport.preparePostgreSQLString(idCity);
     CityEntity cityEntityFromRequest = cityRepository.findById(prepareIdCity).orElseThrow(
         () -> new NotFoundException(String.format("City with ID \"%s\" not found", idCity)));
 
@@ -116,16 +108,16 @@ public class CityServiceFB implements CityService {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter
-        .fromSave(idCity, citySave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(idCity, citySave, DBSecuritySupport::preparePostgreSQLString);
 
     String prepareIdCity = cityEntityFromSave.getId();
 
     // Проверка существование города по его ID
-    dbIntegrityService.checkExistenceById(
+    DBSecuritySupport.checkExistenceById(
         cityRepository::existsById, prepareIdCity);
 
     // Проверка отсутствия города с отличным от данного ID и данным названием
-    dbIntegrityService.checkAbsenceAnotherByUniqStr(
+    DBSecuritySupport.checkAbsenceAnotherByUniqStr(
         cityRepository::existsByIdIsNotAndName, prepareIdCity, cityEntityFromSave.getName());
 
     cityRepository.save(cityEntityFromSave);
@@ -140,10 +132,10 @@ public class CityServiceFB implements CityService {
   @Override
   public void delete(String idCity) throws NotFoundException {
 
-    String prepareIdCity = dbIntegrityService.preparePostgreSQLString(idCity);
+    String prepareIdCity = DBSecuritySupport.preparePostgreSQLString(idCity);
 
     // Проверка существование города по его ID
-    dbIntegrityService.checkExistenceById(
+    DBSecuritySupport.checkExistenceById(
         cityRepository::existsById, prepareIdCity);
 
     cityRepository.deleteById(prepareIdCity);

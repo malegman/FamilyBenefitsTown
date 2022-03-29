@@ -11,8 +11,8 @@ import com.example.familybenefitstown.exceptions.InvalidEmailException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.AdminService;
-import com.example.familybenefitstown.security.services.interfaces.DBIntegrityService;
-import com.example.familybenefitstown.part_auth.services.interfaces.MailService;
+import com.example.familybenefitstown.security.DBSecuritySupport;
+import com.example.familybenefitstown.security.MailSecuritySupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,30 +35,15 @@ public class AdminServiceFB implements AdminService {
   private final RoleRepository roleRepository;
 
   /**
-   * Интерфейс сервиса, отвечающего за целостность базы данных
-   */
-  private final DBIntegrityService dbIntegrityService;
-  /**
-   * Интерфейс сервиса для отправки сообщений на электронную почту
-   */
-  private final MailService mailService;
-
-  /**
    * Конструктор для инициализации интерфейсов репозиториев и сервисов
    * @param userRepository репозиторий, работающий с моделью таблицы "user"
    * @param roleRepository репозиторий, работающий с моделью таблицы "role"
-   * @param dbIntegrityService интерфейс сервиса, отвечающего за целостность базы данных
-   * @param mailService интерфейс сервиса для отправки сообщений на электронную почту
    */
   @Autowired
   public AdminServiceFB(UserRepository userRepository,
-                        RoleRepository roleRepository,
-                        DBIntegrityService dbIntegrityService,
-                        MailService mailService) {
+                        RoleRepository roleRepository) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
-    this.dbIntegrityService = dbIntegrityService;
-    this.mailService = mailService;
   }
 
   /**
@@ -70,7 +55,7 @@ public class AdminServiceFB implements AdminService {
   @Override
   public AdminInfo read(String idAdmin) throws NotFoundException {
 
-    String preparedIdAdmin = dbIntegrityService.preparePostgreSQLString(idAdmin);
+    String preparedIdAdmin = DBSecuritySupport.preparePostgreSQLString(idAdmin);
 
     // Получение администратора по его ID, если администратор существует
     UserEntity userEntityFromRequest = userRepository.findById(preparedIdAdmin).orElseThrow(
@@ -92,15 +77,15 @@ public class AdminServiceFB implements AdminService {
   public void update(String idAdmin, AdminSave adminSave) throws NotFoundException, InvalidEmailException, AlreadyExistsException, InvalidStringException {
 
     // Проверка строки email на соответствие формату email
-    mailService.checkEmailElseThrow(adminSave.getEmail());
+    MailSecuritySupport.checkEmailElseThrow(adminSave.getEmail());
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     UserEntity userEntityFromSave = AdminDBConverter
-        .fromSave(idAdmin, adminSave, dbIntegrityService::preparePostgreSQLString);
+        .fromSave(idAdmin, adminSave, DBSecuritySupport::preparePostgreSQLString);
     String preparedIdAdmin = userEntityFromSave.getId();
 
     // Проверка отсутствия пользователя с отличным от данного ID и данным email
-    dbIntegrityService.checkAbsenceAnotherByUniqStr(
+    DBSecuritySupport.checkAbsenceAnotherByUniqStr(
         userRepository::existsByIdIsNotAndEmail, preparedIdAdmin, userEntityFromSave.getEmail());
 
     // Получение администратора по его ID, если администратора существует
