@@ -5,16 +5,16 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Контейнер, содержащий токены доступа (jwt) и восстановления. Создается сервисом {@link TokenCodeService}
+ * Контейнер, содержащий данные токены доступа (jwt) и восстановления. Создается сервисом {@link TokenCodeService}
  */
 @Builder
 @Getter
-public class AuthTokens {
+public class AuthData {
 
   /**
-   * Токен доступа в формате jwt
+   * Данные токена доступа jwt
    */
-  private String jwt;
+  private JwtData jwtData;
 
   /**
    * Токен восстановления
