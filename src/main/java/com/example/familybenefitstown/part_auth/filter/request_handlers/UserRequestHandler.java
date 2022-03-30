@@ -1,10 +1,8 @@
 package com.example.familybenefitstown.part_auth.filter.request_handlers;
 
-import com.example.familybenefitstown.part_auth.models.AuthenticateResponse;
-import com.example.familybenefitstown.part_auth.models.JwtUserData;
-import com.example.familybenefitstown.part_auth.models.RequestHandlerResponse;
-import com.example.familybenefitstown.part_auth.services.interfaces.AuthService;
 import com.example.familybenefitstown.part_auth.HttpHeadersSupport;
+import com.example.familybenefitstown.part_auth.models.JwtUserData;
+import com.example.familybenefitstown.part_auth.services.interfaces.AuthService;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
 import org.springframework.stereotype.Component;
@@ -52,16 +50,16 @@ public class UserRequestHandler {
    * </ol>
    * @param request http запрос
    * @param response http ответ
-   * @return объект, содержащий флаг успешности проверки и ответ
+   * @return true, если запрос успешно обработан
    */
-  public RequestHandlerResponse handle(HttpServletRequest request, HttpServletResponse response) {
+  public boolean handle(HttpServletRequest request, HttpServletResponse response) {
 
     String requestURI = request.getRequestURI();
     String requestMethod = request.getMethod();
 
     // Разрешение запросов, которые доступны всем
     if (requestMethod.equals("GET") && requestURI.equals("/api/users/init-data")) {
-      return new RequestHandlerResponse(true, response);
+      return true;
     }
 
     // Разрешение запросов для анонимных пользователей
@@ -69,10 +67,10 @@ public class UserRequestHandler {
 
       // Проверка отсутствия аутентификации по наличию токена восстановления
       if (HttpHeadersSupport.getRefreshToken(request) == null) {
-        return new RequestHandlerResponse(true, response);
+        return true;
       }
       response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      return new RequestHandlerResponse(false, response);
+      return false;
     }
 
     Matcher matcherUsersId = PATTERN_USERS_ID.matcher(requestURI);
@@ -82,23 +80,23 @@ public class UserRequestHandler {
         matcherUsersId.matches()) {
 
       // Проверка аутентификации по токенам доступа (jwt) и восстановления из запроса
-      Optional<AuthenticateResponse> optAuthenticateResponse = authService.authenticate(request, response);
-      if (optAuthenticateResponse.isEmpty()) {
+      Optional<JwtUserData> optUserData = authService.authenticate(request, response);
+      if (optUserData.isEmpty()) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        return new RequestHandlerResponse(false, response);
+        return false;
       }
-      JwtUserData userData = optAuthenticateResponse.get().getUserData();
+      JwtUserData userData = optUserData.get();
 
       // Проверка авторизации по наличию необходимых ролей
       if (!userData.hasRole(List.of(RDB.ROLE_USER)) ||
           !userData.getIdUser().equals(matcherUsersId.group("id"))) {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        return new RequestHandlerResponse(false, response);
+        return false;
       }
-      return new RequestHandlerResponse(true, response);
+      return true;
     }
 
     response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    return new RequestHandlerResponse(false, response);
+    return false;
   }
 }

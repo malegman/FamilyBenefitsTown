@@ -1,10 +1,8 @@
 package com.example.familybenefitstown.part_auth.filter.request_handlers;
 
-import com.example.familybenefitstown.part_auth.models.AuthenticateResponse;
-import com.example.familybenefitstown.part_auth.models.JwtUserData;
-import com.example.familybenefitstown.part_auth.models.RequestHandlerResponse;
-import com.example.familybenefitstown.part_auth.services.interfaces.AuthService;
 import com.example.familybenefitstown.part_auth.HttpHeadersSupport;
+import com.example.familybenefitstown.part_auth.models.JwtUserData;
+import com.example.familybenefitstown.part_auth.services.interfaces.AuthService;
 import com.example.familybenefitstown.resources.R;
 import com.example.familybenefitstown.resources.RDB;
 import org.springframework.stereotype.Component;
@@ -52,9 +50,9 @@ public class AuthRequestHandler {
    * </ol>
    * @param request http запрос
    * @param response http ответ
-   * @return объект, содержащий флаг успешности проверки и ответ
+   * @return true, если запрос успешно обработан
    */
-  public RequestHandlerResponse handle(HttpServletRequest request, HttpServletResponse response) {
+  public boolean handle(HttpServletRequest request, HttpServletResponse response) {
 
     String requestURI = request.getRequestURI();
     String requestMethod = request.getMethod();
@@ -66,10 +64,10 @@ public class AuthRequestHandler {
 
       // Проверка отсутствия аутентификации по наличию токена восстановления
       if (HttpHeadersSupport.getRefreshToken(request) == null) {
-        return new RequestHandlerResponse(true, response);
+        return true;
       }
       response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      return new RequestHandlerResponse(false, response);
+      return false;
     }
 
     Matcher matcherAuthLogoutId = PATTERN_AUTH_LOGOUT_ID.matcher(requestURI);
@@ -78,23 +76,23 @@ public class AuthRequestHandler {
     if (requestMethod.equals("POST") && matcherAuthLogoutId.matches()) {
 
       // Проверка аутентификации по токенам доступа (jwt) и восстановления из запроса
-      Optional<AuthenticateResponse> optAuthenticateResponse = authService.authenticate(request, response);
-      if (optAuthenticateResponse.isEmpty()) {
+      Optional<JwtUserData> optUserData = authService.authenticate(request, response);
+      if (optUserData.isEmpty()) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        return new RequestHandlerResponse(false, response);
+        return false;
       }
-      JwtUserData userData = optAuthenticateResponse.get().getUserData();
+      JwtUserData userData = optUserData.get();
 
       // Проверка авторизации по наличию необходимых ролей и ID
       if (!userData.hasRole(List.of(RDB.ROLE_USER, RDB.ROLE_ADMIN)) ||
           !userData.getIdUser().equals(matcherAuthLogoutId.group("id"))) {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        return new RequestHandlerResponse(false, response);
+        return false;
       }
-      return new RequestHandlerResponse(true, response);
+      return true;
     }
 
     response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    return new RequestHandlerResponse(false, response);
+    return false;
   }
 }

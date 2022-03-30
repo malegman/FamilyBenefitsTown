@@ -1,7 +1,6 @@
 package com.example.familybenefitstown.part_auth.filter;
 
 import com.example.familybenefitstown.part_auth.filter.request_handlers.*;
-import com.example.familybenefitstown.part_auth.models.RequestHandlerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -65,23 +64,22 @@ public class AllRequestsFilterFB extends OncePerRequestFilter {
   public void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws IOException, ServletException {
 
     String requestURI = request.getRequestURI();
-
-    RequestHandlerResponse checkResponse = new RequestHandlerResponse(false, response);
+    boolean isSuccess = false;
 
     if (requestURI.startsWith("/api/cities")) {
-      checkResponse = cityRequestHandler.handle(request, response);
+      isSuccess = cityRequestHandler.handle(request, response);
     } else if (requestURI.startsWith("/api/users")) {
-      checkResponse = userRequestHandler.handle(request, response);
+      isSuccess = userRequestHandler.handle(request, response);
     } else if (requestURI.startsWith("/api/admins")) {
-      checkResponse = adminRequestHandler.handle(request, response);
+      isSuccess = adminRequestHandler.handle(request, response);
     } else if (requestURI.startsWith("/api/auth")){
-      checkResponse = authRequestHandler.handle(request, response);
+      isSuccess = authRequestHandler.handle(request, response);
     } else if (requestURI.startsWith("/api/sa")){
-      checkResponse = superAdminRequestHandler.handle(request, response);
+      isSuccess = superAdminRequestHandler.handle(request, response);
     }
 
-    if (checkResponse.isSuccess()) {
-      filterChain.doFilter(request, checkResponse.getResponse());
+    if (isSuccess) {
+      filterChain.doFilter(request, response);
     }
   }
 }
