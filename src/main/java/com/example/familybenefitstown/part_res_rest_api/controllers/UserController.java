@@ -5,19 +5,15 @@ import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserInfo
 import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserInitData;
 import com.example.familybenefitstown.part_res_rest_api.api_models.user.UserSave;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.UserService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * Контроллер запросов, связанных с пользователем
  */
-@Slf4j
 @RestController
 public class UserController {
 
@@ -39,70 +35,39 @@ public class UserController {
    * Обрабатывает POST запрос "/api/users" на создание пользователя. Регистрация гостя
    * Для незарегистрированного клиента.
    * @param userSave объект запроса для сохранения пользователя
-   * @param request http запрос
    * @return код ответа, результат обработки запроса
+   * @throws DateTimeException если даты рождения пользователя или детей позже текущей даты
+   * @throws AlreadyExistsException если пользователь с отличным ID и данным email уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
+   * @throws NotFoundException если пользователь, город или критерии с указанными данными не найдены
+   * @throws InvalidEmailException если указанный "email" не является email
+   * @throws DateFormatException если даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy"
    */
   @PostMapping(
       value = "/api/users",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-  public ResponseEntity<?> create(@RequestBody UserSave userSave,
-                                  HttpServletRequest request) {
+  public ResponseEntity<?> create(@RequestBody UserSave userSave)
+      throws DateTimeException, AlreadyExistsException, InvalidStringException, NotFoundException, InvalidEmailException, DateFormatException {
 
-    String requestAddress = request.getRemoteAddr();
-    log.debug("{} POST \"/api/users\": Request in controller", requestAddress);
-
-    // Если тело запроса пустое
-    if (userSave == null) {
-      log.warn("{} POST \"/api/users\": Request body \"userSave\" is empty", requestAddress);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-
-    try {
-      userService.create(userSave);
-      return ResponseEntity.status(HttpStatus.CREATED).build();
-
-    } catch (NotFoundException e) {
-      // Не найдены критерии или город
-      log.warn("{} POST \"/api/users\": {}", requestAddress, e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-    } catch (AlreadyExistsException | InvalidEmailException | DateTimeException | DateFormatException | InvalidStringException e) {
-      // Администратор или пользователь с указанным email существует.
-      // Строка в поле "email" не является email.
-      // Даты позже текущей даты.
-      // Даты не соответствуют формату "dd.mm.yyyy".
-      // Некорректное строковое поле объекта запроса.
-      log.warn("{} POST \"/api/users\": {}", requestAddress, e.getMessage());
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+    userService.create(userSave);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   /**
    * Обрабатывает GET запрос "/api/users/{id}" на получение информации о пользователе.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
-   * @param request http запрос
    * @return информация о пользователе, если запрос выполнен успешно, и код ответа
+   * @throws NotFoundException если пользователь с указанным ID не найден
    */
   @GetMapping(
       value = "/api/users/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
-  public ResponseEntity<UserInfo> read(@PathVariable(name = "id") String idUser,
-                                       HttpServletRequest request) {
+  public ResponseEntity<UserInfo> read(@PathVariable(name = "id") String idUser) throws NotFoundException {
 
-    String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/api/users/{}\": Request in controller", requestAddress, idUser);
-
-    try {
-      UserInfo userInfo = userService.read(idUser);
-      return ResponseEntity.status(HttpStatus.OK).body(userInfo);
-
-    } catch (NotFoundException e) {
-      // Не найден пользователь
-      log.error("{} GET \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+    UserInfo userInfo = userService.read(idUser);
+    return ResponseEntity.status(HttpStatus.OK).body(userInfo);
   }
 
   /**
@@ -110,90 +75,52 @@ public class UserController {
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
    * @param userSave объект запроса для сохранения пользователя
-   * @param request http запрос
    * @return код ответа, результат обработки запроса
+   * @throws DateTimeException если даты рождения пользователя или детей позже текущей даты
+   * @throws AlreadyExistsException если пользователь с отличным ID и данным email уже существует
+   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
+   * @throws NotFoundException если пользователь, город или критерии с указанными данными не найдены
+   * @throws InvalidEmailException если указанный "email" не является email
+   * @throws DateFormatException если даты рождения пользователя или детей не соответствуют формату "dd.mm.yyyy"
    */
   @PutMapping(
       value = "/api/users/{id}",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-  public ResponseEntity<?> update(@PathVariable(name = "id") String idUser,
-                                  @RequestBody UserSave userSave,
-                                  HttpServletRequest request) {
+  public ResponseEntity<?> update(@PathVariable(name = "id") String idUser, @RequestBody UserSave userSave)
+      throws DateTimeException, AlreadyExistsException, InvalidStringException, NotFoundException, InvalidEmailException, DateFormatException {
 
-    String requestAddress = request.getRemoteAddr();
-    log.debug("{} PUT \"/api/users/{}\": Request in controller", requestAddress, idUser);
-
-    // Если тело запроса пустое
-    if (userSave == null) {
-      log.warn("{} PUT \"/api/users/{}\": Request body \"userSave\" is empty", requestAddress, idUser);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-
-    try {
-      userService.update(idUser, userSave);
-      return ResponseEntity.status(HttpStatus.CREATED).build();
-
-    } catch (NotFoundException e) {
-      // Не найден пользователь или не найдены критерии или город
-      log.warn("{} PUT \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-    } catch (InvalidEmailException | DateTimeException | DateFormatException | AlreadyExistsException | InvalidStringException e) {
-      // Строка в поле "email" не является email.
-      // Даты позже текущей даты.
-      // Даты не соответствуют формату "dd.mm.yyyy".
-      // Пользователь с отличным ID и данным email уже существует.
-      // Некорректное строковое поле объекта запроса.
-      log.warn("{} PUT \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+    userService.update(idUser, userSave);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   /**
    * Обрабатывает DELETE запрос "/api/users/{id}" на удаление пользователя.
    * Для выполнения запроса клиент должен быть аутентифицирован и иметь роль "ROLE_USER"
    * @param idUser ID пользователя
-   * @param request http запрос
    * @return код ответа, результат обработки запроса
+   * @throws NotFoundException если пользователь с указанным ID не найден
    */
   @DeleteMapping(
       value = "/api/users/{id}")
-  public ResponseEntity<?> delete(@PathVariable(name = "id") String idUser,
-                                  HttpServletRequest request) {
+  public ResponseEntity<?> delete(@PathVariable(name = "id") String idUser) throws NotFoundException {
 
-    String requestAddress = request.getRemoteAddr();
-    log.debug("{} DELETE \"/api/users/{}\": Request in controller", requestAddress, idUser);
-
-    try {
-      userService.delete(idUser);
-      return ResponseEntity.status(HttpStatus.CREATED).build();
-
-    } catch (NotFoundException e) {
-      // Не найден пользователь
-      log.warn("{} DELETE \"/api/users/{}\": {}", requestAddress, idUser, e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+    userService.delete(idUser);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   /**
    * Обрабатывает GET запрос "/api/users/init-data" на получение дополнительных данных для пользователя.
    * Данные содержат в себе множества кратких информаций о городах и полных критериях.
    * Выполнить запрос может любой клиент
-   * @param request http запрос
    * @return дополнительные данные для пользователя и код ответа
    */
   @GetMapping(
       value = "/api/users/init-data",
       produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
   @ResponseBody
-  public ResponseEntity<UserInitData> getInitData(HttpServletRequest request) {
+  public ResponseEntity<UserInitData> getInitData() {
 
-    String requestAddress = request.getRemoteAddr();
-    log.debug("{} GET \"/api/users/init-data\": Request in controller", requestAddress);
-
-    return ResponseEntity
-        .status(HttpStatus.OK)
-        .body(userService.getInitData());
+    return ResponseEntity.status(HttpStatus.OK).body(userService.getInitData());
   }
 }
 
