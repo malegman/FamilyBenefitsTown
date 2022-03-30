@@ -7,6 +7,7 @@ import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,7 +22,7 @@ public interface CityService {
    * @param nameCity Название города
    * @return множество кратких информаций о городах
    */
-  Set<ObjectShortInfo> readAllFilter(String nameCity);
+  List<ObjectShortInfo> readAllFilter(String nameCity);
 
   /**
    * Создает город по запросу на сохранение

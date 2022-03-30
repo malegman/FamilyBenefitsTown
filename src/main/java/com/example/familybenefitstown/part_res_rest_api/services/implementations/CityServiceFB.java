@@ -1,21 +1,21 @@
 package com.example.familybenefitstown.part_res_rest_api.services.implementations;
 
-import com.example.familybenefitstown.part_res_rest_api.api_models.city.CityInfo;
-import com.example.familybenefitstown.part_res_rest_api.api_models.city.CitySave;
-import com.example.familybenefitstown.part_res_rest_api.api_models.common.ObjectShortInfo;
-import com.example.familybenefitstown.part_res_rest_api.converters.CityDBConverter;
 import com.example.familybenefitstown.dto.entities.CityEntity;
 import com.example.familybenefitstown.dto.repositories.CityRepository;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.part_res_rest_api.api_models.city.CityInfo;
+import com.example.familybenefitstown.part_res_rest_api.api_models.city.CitySave;
+import com.example.familybenefitstown.part_res_rest_api.api_models.common.ObjectShortInfo;
+import com.example.familybenefitstown.part_res_rest_api.converters.CityDBConverter;
 import com.example.familybenefitstown.part_res_rest_api.services.interfaces.CityService;
 import com.example.familybenefitstown.security.DBSecuritySupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -47,13 +47,13 @@ public class CityServiceFB implements CityService {
    * @return множество кратких информаций о городах
    */
   @Override
-  public Set<ObjectShortInfo> readAllFilter(String nameCity) {
+  public List<ObjectShortInfo> readAllFilter(String nameCity) {
 
     return cityRepository.findAll()
         .stream()
         .filter(cityEntity -> nameCity == null || cityEntity.getName().equals(nameCity))
         .map(CityDBConverter::toShortInfo)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toList());
   }
 
   /**
