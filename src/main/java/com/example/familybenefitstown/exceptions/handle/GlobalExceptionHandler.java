@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * Обрабатывает исключение {@link DateFormatException}, выброшенное контроллером
    * @param ex выброшенное контроллером исключение
    * @param request запрос, обработка которого вызывала исключение
-   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки и кодом варианта api
+   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки 400 и кодом варианта api
    */
   @ExceptionHandler(DateFormatException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * Обрабатывает исключение {@link DateTimeException}, выброшенное контроллером
    * @param ex выброшенное контроллером исключение
    * @param request запрос, обработка которого вызывала исключение
-   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки и кодом варианта api
+   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки 400 и кодом варианта api
    */
   @ExceptionHandler(DateTimeException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * Обрабатывает исключение {@link InvalidEmailException}, выброшенное контроллером
    * @param ex выброшенное контроллером исключение
    * @param request запрос, обработка которого вызывала исключение
-   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки и кодом варианта api
+   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки 400 и кодом варианта api
    */
   @ExceptionHandler(InvalidEmailException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * Обрабатывает исключение {@link InvalidStringException}, выброшенное контроллером
    * @param ex выброшенное контроллером исключение
    * @param request запрос, обработка которого вызывала исключение
-   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки и кодом варианта api
+   * @return ответ ошибки {@link ErrorResponse} со статусом ошибки 400 и кодом варианта api
    */
   @ExceptionHandler(InvalidStringException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -126,5 +126,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity.badRequest().body(new ErrorResponse(
         HttpStatus.BAD_REQUEST.value(), InvalidStringException.API_VARIANT_CODE));
+  }
+
+  /**
+   * Обрабатывает исключение {@link NotFoundException}, выброшенное контроллером
+   * @param ex выброшенное контроллером исключение
+   * @param request запрос, обработка которого вызывала исключение
+   * @return ответ со статусом ошибки 404
+   */
+  @ExceptionHandler(NotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponseEntity<?> handleNotFoundException(NotFoundException ex, WebRequest request) {
+
+    HttpServletRequest httpServletRequest = ((HttpServletRequest)((NativeWebRequest)request).getNativeRequest());
+
+    String requestURI = httpServletRequest.getRequestURI();
+    String requestMethod = httpServletRequest.getMethod();
+    String requestAddress = httpServletRequest.getRemoteAddr();
+
+    log.warn("{} {} \"{}\": Not found exception: {}", requestAddress, requestMethod, requestURI, ex.getMessage());
+
+    return ResponseEntity.notFound().build();
+  }
+
+  /**
+   * Обрабатывает непредусмотренное исключение {@link Exception}, выброшенное контроллером
+   * @param ex выброшенное контроллером исключение
+   * @param request запрос, обработка которого вызывала исключение
+   * @return ответ со статусом ошибки 502
+   */
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponseEntity<?> handleAllUncaughtException(Exception ex, WebRequest request) {
+
+    HttpServletRequest httpServletRequest = ((HttpServletRequest)((NativeWebRequest)request).getNativeRequest());
+
+    String requestURI = httpServletRequest.getRequestURI();
+    String requestMethod = httpServletRequest.getMethod();
+    String requestAddress = httpServletRequest.getRemoteAddr();
+
+    log.warn("{} {} \"{}\": Uncaught exception: {}", requestAddress, requestMethod, requestURI, ex);
+
+    return ResponseEntity.internalServerError().build();
   }
 }
