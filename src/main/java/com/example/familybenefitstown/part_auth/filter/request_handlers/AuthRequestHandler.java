@@ -66,7 +66,7 @@ public class AuthRequestHandler {
       if (HttpHeadersSupport.getRefreshToken(request) == null) {
         return true;
       }
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return false;
     }
 

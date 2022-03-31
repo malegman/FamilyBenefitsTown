@@ -41,7 +41,7 @@ paths:
         '200':
           description: Вход в систему выполнен
           content: { }
-        '401':
+        '400':
           description: Вход в систему уже выполнен
           content: { }
         '404':
