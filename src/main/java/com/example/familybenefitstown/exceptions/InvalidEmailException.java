@@ -6,6 +6,11 @@ package com.example.familybenefitstown.exceptions;
 public class InvalidEmailException extends Exception {
 
   /**
+   * Код варианта ошибки в api
+   */
+  public static final int API_VARIANT_CODE = 4;
+
+  /**
    * Конструктор, создает исключение с описанием исключения
    * @param message описание исключения
    */
