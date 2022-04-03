@@ -28,7 +28,7 @@ public class UserDBConverter {
    * @return модель таблицы "user"
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  static public UserEntity fromSave(String idUser, UserSave userSave, Function<String, String> prepareDBFunc) throws InvalidStringException {
+  public static UserEntity fromSave(String idUser, UserSave userSave, Function<String, String> prepareDBFunc) throws InvalidStringException {
 
     if (userSave == null) {
       return new UserEntity();
@@ -39,9 +39,9 @@ public class UserDBConverter {
         .id(idUser != null
                 ? prepareDBFunc.apply(idUser)
                 : RandomValue.randomString(R.ID_LENGTH))
-        .name(prepareDBFunc.apply(withSymbolsField(userSave.getName(), "name", true)))
-        .email(prepareDBFunc.apply(withSymbolsField(userSave.getEmail(), "email", true)))
-        .idCity(prepareDBFunc.apply(withSymbolsField(userSave.getIdCity(), "idCity", true)))
+        .name(prepareDBFunc.apply(FieldConverter.withSymbolsField(userSave.getName(), "name", true)))
+        .email(prepareDBFunc.apply(FieldConverter.withSymbolsField(userSave.getEmail(), "email", true)))
+        .idCity(prepareDBFunc.apply(FieldConverter.withSymbolsField(userSave.getIdCity(), "idCity", true)))
         .build();
   }
 
@@ -54,7 +54,7 @@ public class UserDBConverter {
    * @param nameCity название города пользователя
    * @return информация о пользователе
    */
-  static public UserInfo toInfo(UserEntity userEntity, List<ChildBirthEntity> childBirthEntityList, List<RoleEntity> roleEntityList, String nameCity) {
+  public static UserInfo toInfo(UserEntity userEntity, List<ChildBirthEntity> childBirthEntityList, List<RoleEntity> roleEntityList, String nameCity) {
 
     if (userEntity == null) {
       return new UserInfo();
@@ -75,29 +75,6 @@ public class UserDBConverter {
                          .collect(Collectors.toList()))
         .nameCity(nameCity)
         .build();
-  }
-
-  /**
-   * Проверяет строковое поле на содержание букв латиницы и кириллицы и цифр.
-   * При успешной проверки возвращается проверяемая строка без изменений.
-   * Иначе выбрасывается исключение.
-   * @param str проверяемая строка
-   * @param field поле, значение которого проверяется
-   * @param isRequired true, если поле является обязательным, не может быть null
-   * @return проверяемая строка при успешной проверке
-   * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
-   */
-  private static String withSymbolsField(String str, String field, boolean isRequired) throws InvalidStringException {
-
-    if (str == null && !isRequired) {
-      return null;
-    }
-    if (str != null && R.STRING_SYMBOLS_PATTERN.matcher(str).find()) {
-      return str;
-    }
-
-    throw new InvalidStringException(String.format(
-        "Attempt to store a string without letters and numbers in the \"%s\" field ", field));
   }
 }
 
