@@ -68,12 +68,5 @@ public interface UserService {
    * @return дополнительные данные для пользователя
    */
   UserInitData getInitData();
-
-  /**
-   * Проверяет существование пользователя по email
-   * @param email почта пользователя
-   * @return {@code true}, если пользователь существует
-   */
-  boolean existsByEmail(String email);
 }
 

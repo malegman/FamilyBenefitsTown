@@ -243,18 +243,6 @@ public class UserServiceFB implements UserService {
   }
 
   /**
-   * Проверяет существование пользователя по email
-   * @param email почта пользователя
-   * @return {@code true}, если пользователь существует
-   */
-  @Override
-  public boolean existsByEmail(String email) {
-
-    String prepareEmail = DBSecuritySupport.preparePostgreSQLString(email);
-    return userRepository.existsByEmail(prepareEmail);
-  }
-
-  /**
    * Возвращает модель пользователя по его ID
    * @param prepareId подготовленное для бд ID пользователя
    * @return модель пользователя
