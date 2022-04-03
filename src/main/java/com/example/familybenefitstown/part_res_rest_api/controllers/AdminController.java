@@ -43,7 +43,7 @@ public class AdminController {
    */
   @GetMapping(
       value = "/api/admins/{id}",
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<AdminInfo> read(@PathVariable(name = "id") String idAdmin) throws NotFoundException {
 
@@ -65,7 +65,7 @@ public class AdminController {
    */
   @PutMapping(
       value = "/api/admins/{id}",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> update(@PathVariable(name = "id") String idAdmin, @RequestBody AdminSave adminSave)
       throws AlreadyExistsException, InvalidStringException, NotFoundException, InvalidEmailException {
 

@@ -36,7 +36,7 @@ public class CityController {
   }
 
   /**
-   * Обрабатывает GET запрос "/api/cities/all" на получение множества городов,
+   * Обрабатывает GET запрос "/api/cities" на получение списка городов,
    * в которых есть учреждения и пособия.
    * Фильтр по названию или ID пособия.
    * Выполнить запрос может любой клиент
@@ -45,12 +45,12 @@ public class CityController {
    */
   @GetMapping(
       value = "/api/cities",
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<List<ObjectShortInfo>> readAllFilter(@RequestParam(name = "name", required = false) String name) {
 
-    List<ObjectShortInfo> cityShortInfoSet = cityService.readAllFilter(name);
-    return ResponseEntity.status(HttpStatus.OK).body(cityShortInfoSet);
+    List<ObjectShortInfo> cityShortInfoList = cityService.readAllFilter(name);
+    return ResponseEntity.status(HttpStatus.OK).body(cityShortInfoList);
   }
 
   /**
@@ -60,13 +60,12 @@ public class CityController {
    * @return код ответа, результат обработки запроса
    * @throws AlreadyExistsException если город с указанным названием уже существует
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
-   * @throws NotFoundException если пособие города с указанным ID не найдено
    */
   @PostMapping(
       value = "/api/cities",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> create(@RequestBody CitySave citySave)
-      throws AlreadyExistsException, InvalidStringException, NotFoundException {
+      throws AlreadyExistsException, InvalidStringException {
 
     cityService.create(citySave);
     return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -81,7 +80,7 @@ public class CityController {
    */
   @GetMapping(
       value = "/api/cities/{id}",
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<CityInfo> read(@PathVariable(name = "id") String idCity) throws NotFoundException {
 
@@ -101,7 +100,7 @@ public class CityController {
    */
   @PutMapping(
       value = "/api/cities/{id}",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> update(@PathVariable(name = "id") String idCity, @RequestBody CitySave citySave)
       throws AlreadyExistsException, InvalidStringException, NotFoundException {
 

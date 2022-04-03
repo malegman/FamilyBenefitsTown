@@ -43,7 +43,7 @@ public class SuperAdminController {
    */
   @PostMapping(
       value = "/api/sa/admins",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> create(@RequestBody AdminSave adminSave)
       throws AlreadyExistsException, InvalidStringException, InvalidEmailException {
 

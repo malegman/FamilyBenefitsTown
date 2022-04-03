@@ -45,7 +45,7 @@ public class UserController {
    */
   @PostMapping(
       value = "/api/users",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> create(@RequestBody UserSave userSave)
       throws DateTimeException, AlreadyExistsException, InvalidStringException, NotFoundException, InvalidEmailException, DateFormatException {
 
@@ -62,7 +62,7 @@ public class UserController {
    */
   @GetMapping(
       value = "/api/users/{id}",
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<UserInfo> read(@PathVariable(name = "id") String idUser) throws NotFoundException {
 
@@ -85,7 +85,7 @@ public class UserController {
    */
   @PutMapping(
       value = "/api/users/{id}",
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> update(@PathVariable(name = "id") String idUser, @RequestBody UserSave userSave)
       throws DateTimeException, AlreadyExistsException, InvalidStringException, NotFoundException, InvalidEmailException, DateFormatException {
 
@@ -116,7 +116,7 @@ public class UserController {
    */
   @GetMapping(
       value = "/api/users/init-data",
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<UserInitData> getInitData() {
 
