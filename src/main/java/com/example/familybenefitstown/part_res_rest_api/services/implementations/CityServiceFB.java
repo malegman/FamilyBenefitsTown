@@ -60,11 +60,10 @@ public class CityServiceFB implements CityService {
    * Создает город по запросу на сохранение
    * @param citySave объект запроса на сохранение города
    * @throws AlreadyExistsException если город с указанным названием уже существует
-   * @throws NotFoundException если пособие города с указанным ID не найдено
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
   @Override
-  public void create(CitySave citySave) throws AlreadyExistsException, NotFoundException, InvalidStringException {
+  public void create(CitySave citySave) throws AlreadyExistsException, InvalidStringException {
 
     // Получение модели таблицы из запроса с подготовкой строковых значений для БД
     CityEntity cityEntityFromSave = CityDBConverter

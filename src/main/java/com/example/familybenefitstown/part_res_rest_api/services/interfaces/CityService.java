@@ -1,14 +1,13 @@
 package com.example.familybenefitstown.part_res_rest_api.services.interfaces;
 
-import com.example.familybenefitstown.part_res_rest_api.api_models.city.CityInfo;
-import com.example.familybenefitstown.part_res_rest_api.api_models.city.CitySave;
-import com.example.familybenefitstown.part_res_rest_api.api_models.common.ObjectShortInfo;
 import com.example.familybenefitstown.exceptions.AlreadyExistsException;
 import com.example.familybenefitstown.exceptions.InvalidStringException;
 import com.example.familybenefitstown.exceptions.NotFoundException;
+import com.example.familybenefitstown.part_res_rest_api.api_models.city.CityInfo;
+import com.example.familybenefitstown.part_res_rest_api.api_models.city.CitySave;
+import com.example.familybenefitstown.part_res_rest_api.api_models.common.ObjectShortInfo;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Интерфейс сервиса, управляющего объектом "город"
@@ -28,10 +27,9 @@ public interface CityService {
    * Создает город по запросу на сохранение
    * @param citySave объект запроса на сохранение города
    * @throws AlreadyExistsException если город с указанным названием уже существует
-   * @throws NotFoundException если пособие города с указанным ID не найдено
    * @throws InvalidStringException если строковое поле объекта запроса не содержит букв или цифр
    */
-  void create(CitySave citySave) throws AlreadyExistsException, NotFoundException, InvalidStringException;
+  void create(CitySave citySave) throws AlreadyExistsException, InvalidStringException;
 
   /**
    * Возвращает информацию о городе по его ID
