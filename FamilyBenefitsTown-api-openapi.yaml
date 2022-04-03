@@ -158,6 +158,7 @@ paths:
             (3) Даты рождения пользователя или детей позже текущей даты
             (4) Указанный "email" не является email
             (5) Некорректное строковое поле
+          content: { }
         '403':
           description: Нет доступа
           content: { }
@@ -291,7 +292,7 @@ paths:
       summary: Возвращает дополнительные данные для пользователя
       description:
         Возвращает дополнительные данные для создания или обновления пользователя.
-        Данные содержат в себе множества кратких информаций о городах.
+        Данные содержат в себе списки кратких информаций о городах.
       responses:
         '200':
           description: Дополнительные данные пользователя получены
@@ -572,12 +573,13 @@ paths:
     get:
       tags:
         - city
-      summary: Возвращает множество городов.
+      summary:
+        Возвращает список городов.
       description:
-        Возвращает множество городов.
+        Возвращает список городов.
       responses:
         '200':
-          description: Множество городов получено
+          description: Список городов получено
           content:
             application/json:
               schema:
@@ -751,7 +753,7 @@ components:
           type: string
           example: exmaple@mail.com
         birthDateChildren:
-          description: Множество дат рождений детей пользователя
+          description: Список дат рождений детей пользователя
           type: array
           items:
             type: string
@@ -762,8 +764,8 @@ components:
           type: string
           format: date
           example: 01.01.2022
-        nameRoleSet:
-          description: Множество названий ролей пользователя
+        nameRoleList:
+          description: Список названий ролей пользователя
           type: array
           items:
             description: Название роли
@@ -785,7 +787,7 @@ components:
           type: string
           example: exmaple@mail.com
         birthDateChildren:
-          description: Множество дат рождений детей пользователя
+          description: Список дат рождений детей пользователя
           type: array
           items:
             description: Дата рождения ребенка
@@ -801,8 +803,8 @@ components:
           description: ID города пользователя
           type: string
           example: td56387fhj
-        idCriterionSet:
-          description: Множество ID критерий пользователя
+        idCriterionList:
+          description: Список ID критерий пользователя
           type: array
           items:
             description: ID критерия
@@ -810,10 +812,10 @@ components:
             example: td56387fhj
     UserInitData:
       description: Дополнительные данные для создания или обновления пользователя.
-        Содержат в себе множества кратких информаций о городах
+        Содержат в себе списки кратких информаций о городах
       properties:
-        shortCitySet:
-          description: Множество кратких информаций о городах
+        shortCityList:
+          description: Список кратких информаций о городах
           type: array
           items:
             $ref: '#/components/schemas/ObjectShortInfo'
@@ -830,8 +832,8 @@ components:
           description: Имя пользователя
           type: string
           example: name
-        nameRoleUserSet:
-          description: Множество названий ролей пользователя
+        nameRoleUserList:
+          description: Список названий ролей пользователя
           type: array
           items:
             description: Роль пользователя
@@ -854,8 +856,8 @@ components:
           description: Электронная почта администратора
           type: string
           example: exmaple@mail.com
-        nameRoleSet:
-          description: Множество названий ролей администратора
+        nameRoleList:
+          description: Список названий ролей администратора
           type: array
           items:
             description: Название роли
